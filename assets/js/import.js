@@ -5,12 +5,12 @@
  */
 
 import { db, generateId } from './database.js';
-import { Validators } from '../utils/validators.js';
-import { UrlUtils } from '../utils/url-utils.js';
-import { DateUtils } from '../utils/date-utils.js';
-import { FileUtils } from '../utils/file-utils.js';
-import { CsvParser } from '../utils/csv-parser.js';
-import { HtmlBookmarkParser } from '../utils/html-bookmark-parser.js';
+import { Validators } from '../../utils/validators.js';
+import { UrlUtils } from '../../utils/url-utils.js';
+import { DateUtils } from '../../utils/date-utils.js';
+import { FileUtils } from '../../utils/file-utils.js';
+import { CsvParser } from '../../utils/csv-parser.js';
+import { HtmlBookmarkParser } from '../../utils/html-bookmark-parser.js';
 import { LinkManager } from './link-manager.js';
 import { FolderManager } from './folder-manager.js';
 

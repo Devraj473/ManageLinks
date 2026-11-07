@@ -1,0 +1,12 @@
+# ManageLinks - Apache Configuration for WAMP
+<IfModule mod_mime.c>
+  AddType application/javascript .js .mjs
+  AddType text/css .css
+  AddType application/manifest+json .json
+  AddType image/svg+xml .svg
+</IfModule>
+
+<IfModule mod_headers.c>
+  # Enable CORS for local testing if needed
+  Header set Access-Control-Allow-Origin "*"
+</IfModule>

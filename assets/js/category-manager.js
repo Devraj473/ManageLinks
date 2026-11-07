@@ -4,7 +4,7 @@
  */
 
 import { db, generateId } from './database.js';
-import { DateUtils } from '../utils/date-utils.js';
+import { DateUtils } from '../../utils/date-utils.js';
 
 export const DEFAULT_CATEGORIES = [
   { name: 'AI Tools', description: 'Artificial Intelligence, LLMs, and generators', icon: 'cpu', color: '#6366f1' },

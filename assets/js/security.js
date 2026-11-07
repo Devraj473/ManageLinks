@@ -6,7 +6,7 @@
 
 import { db } from './database.js';
 import { Storage } from './storage.js';
-import { Encryption } from '../utils/encryption.js';
+import { Encryption } from '../../utils/encryption.js';
 
 export const Security = {
   SESSION_UNLOCKED_KEY: 'app_session_unlocked',

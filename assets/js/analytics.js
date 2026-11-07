@@ -5,7 +5,7 @@
  */
 
 import { db } from './database.js';
-import { DateUtils } from '../utils/date-utils.js';
+import { DateUtils } from '../../utils/date-utils.js';
 
 export const Analytics = {
   /**

@@ -5,10 +5,10 @@
  */
 
 import { db, generateId } from './database.js';
-import { DateUtils } from '../utils/date-utils.js';
-import { UrlUtils } from '../utils/url-utils.js';
-import { FileUtils } from '../utils/file-utils.js';
-import { Encryption } from '../utils/encryption.js';
+import { DateUtils } from '../../utils/date-utils.js';
+import { UrlUtils } from '../../utils/url-utils.js';
+import { FileUtils } from '../../utils/file-utils.js';
+import { Encryption } from '../../utils/encryption.js';
 import { BackupManager } from './backup.js';
 
 export const RestoreManager = {

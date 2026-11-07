@@ -222,10 +222,10 @@ export const CategoriesPage = {
     `;
 
     document.getElementById('btn-cat-add-link')?.addEventListener('click', () => {
-      const { LinkModal } = import('../components/link-modal.js').then(m => m.LinkModal.openForAdd({ categoryId }));
+      import('../components/link-modal.js').then(m => m.LinkModal.openForAdd({ categoryId }));
     });
     document.getElementById('cat-empty-add-btn')?.addEventListener('click', () => {
-      const { LinkModal } = import('../components/link-modal.js').then(m => m.LinkModal.openForAdd({ categoryId }));
+      import('../components/link-modal.js').then(m => m.LinkModal.openForAdd({ categoryId }));
     });
 
     UI.bindLinkEvents(document.getElementById('cat-links-list'), () => this.renderCategoryDetail(categoryId));

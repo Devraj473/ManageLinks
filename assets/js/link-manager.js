@@ -4,8 +4,8 @@
  */
 
 import { db, generateId } from './database.js';
-import { UrlUtils } from '../utils/url-utils.js';
-import { DateUtils } from '../utils/date-utils.js';
+import { UrlUtils } from '../../utils/url-utils.js';
+import { DateUtils } from '../../utils/date-utils.js';
 
 export const LinkManager = {
   /**

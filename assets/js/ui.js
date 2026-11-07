@@ -5,9 +5,9 @@
 
 import { LinkManager } from './link-manager.js';
 import { Toast } from './notifications.js';
-import { UrlUtils } from '../utils/url-utils.js';
-import { LinkModal } from '../components/link-modal.js';
-import { ConfirmationModal } from '../components/confirmation-modal.js';
+import { UrlUtils } from '../../utils/url-utils.js';
+import { LinkModal } from '../../components/link-modal.js';
+import { ConfirmationModal } from '../../components/confirmation-modal.js';
 
 export const UI = {
   selectedIds: new Set(),

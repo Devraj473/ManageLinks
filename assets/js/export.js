@@ -5,10 +5,10 @@
  */
 
 import { db } from './database.js';
-import { DateUtils } from '../utils/date-utils.js';
-import { FileUtils } from '../utils/file-utils.js';
-import { CsvParser } from '../utils/csv-parser.js';
-import { HtmlBookmarkParser } from '../utils/html-bookmark-parser.js';
+import { DateUtils } from '../../utils/date-utils.js';
+import { FileUtils } from '../../utils/file-utils.js';
+import { CsvParser } from '../../utils/csv-parser.js';
+import { HtmlBookmarkParser } from '../../utils/html-bookmark-parser.js';
 import { BackupManager } from './backup.js';
 
 export const ExportManager = {

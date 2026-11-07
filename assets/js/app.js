@@ -15,30 +15,30 @@ import { Toast } from './notifications.js';
 import { Icons } from './icons.js';
 
 // Components
-import { SidebarComponent } from '../components/sidebar.js';
-import { NavbarComponent } from '../components/navbar.js';
-import { LinkModal } from '../components/link-modal.js';
-import { CategoryModal } from '../components/category-modal.js';
-import { FolderModal } from '../components/folder-modal.js';
-import { CollectionModal } from '../components/collection-modal.js';
-import { SearchModal } from '../components/search-modal.js';
-import { ConfirmationModal } from '../components/confirmation-modal.js';
+import { SidebarComponent } from '../../components/sidebar.js';
+import { NavbarComponent } from '../../components/navbar.js';
+import { LinkModal } from '../../components/link-modal.js';
+import { CategoryModal } from '../../components/category-modal.js';
+import { FolderModal } from '../../components/folder-modal.js';
+import { CollectionModal } from '../../components/collection-modal.js';
+import { SearchModal } from '../../components/search-modal.js';
+import { ConfirmationModal } from '../../components/confirmation-modal.js';
 
 // Pages
-import { DashboardPage } from '../pages/dashboard.js';
-import { AllLinksPage } from '../pages/all-links.js';
-import { LinkInboxPage } from '../pages/link-inbox.js';
-import { FavoritesPage } from '../pages/favorites.js';
-import { CategoriesPage } from '../pages/categories.js';
-import { FoldersPage } from '../pages/folders.js';
-import { CollectionsPage } from '../pages/collections.js';
-import { ReadingListPage } from '../pages/reading-list.js';
-import { ArchivePage } from '../pages/archive.js';
-import { TrashPage } from '../pages/trash.js';
-import { AnalyticsPage } from '../pages/analytics.js';
-import { DataManagementPage } from '../pages/data-management.js';
-import { SettingsPage } from '../pages/settings.js';
-import { AboutPage } from '../pages/about.js';
+import { DashboardPage } from '../../pages/dashboard.js';
+import { AllLinksPage } from '../../pages/all-links.js';
+import { LinkInboxPage } from '../../pages/link-inbox.js';
+import { FavoritesPage } from '../../pages/favorites.js';
+import { CategoriesPage } from '../../pages/categories.js';
+import { FoldersPage } from '../../pages/folders.js';
+import { CollectionsPage } from '../../pages/collections.js';
+import { ReadingListPage } from '../../pages/reading-list.js';
+import { ArchivePage } from '../../pages/archive.js';
+import { TrashPage } from '../../pages/trash.js';
+import { AnalyticsPage } from '../../pages/analytics.js';
+import { DataManagementPage } from '../../pages/data-management.js';
+import { SettingsPage } from '../../pages/settings.js';
+import { AboutPage } from '../../pages/about.js';
 
 export const App = {
   router: null,
@@ -259,8 +259,8 @@ export const App = {
           <div id="recent-visited-list"><div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div></div></div>
         `;
         const { SearchEngine } = await import('./search.js');
-        const { LinkCard } = await import('../components/link-card.js');
-        const { EmptyState } = await import('../components/empty-state.js');
+        const { LinkCard } = await import('../../components/link-card.js');
+        const { EmptyState } = await import('../../components/empty-state.js');
         const { UI } = await import('./ui.js');
 
         const links = await SearchEngine.search('', { sortBy: 'recently-visited' });
