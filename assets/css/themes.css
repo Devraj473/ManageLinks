@@ -1,0 +1,101 @@
+/**
+ * ManageLinks - Themes (Light & Dark)
+ * Developer: Devraj Chauhan
+ */
+
+:root,
+[data-bs-theme="light"] {
+  --ml-primary: #2563eb;
+  --ml-primary-hover: #1d4ed8;
+  --ml-primary-light: #eff6ff;
+  --ml-primary-border: #bfdbfe;
+
+  --ml-bg: #f8fafc;
+  --ml-bg-surface: #ffffff;
+  --ml-bg-elevated: #ffffff;
+  --ml-bg-hover: #f1f5f9;
+  --ml-bg-active: #e2e8f0;
+
+  --ml-border: #e2e8f0;
+  --ml-border-focus: #3b82f6;
+
+  --ml-text-primary: #0f172a;
+  --ml-text-secondary: #475569;
+  --ml-text-muted: #94a3b8;
+  --ml-text-inverse: #ffffff;
+
+  --ml-card-bg: #ffffff;
+  --ml-card-border: #e2e8f0;
+  --ml-card-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --ml-card-hover-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+
+  --ml-sidebar-bg: #ffffff;
+  --ml-sidebar-border: #e2e8f0;
+  --ml-sidebar-text: #334155;
+  --ml-sidebar-hover: #f1f5f9;
+  --ml-sidebar-active: #eff6ff;
+  --ml-sidebar-active-text: #2563eb;
+
+  --ml-header-bg: rgba(255, 255, 255, 0.95);
+  --ml-header-border: #e2e8f0;
+
+  --ml-success: #10b981;
+  --ml-success-light: #ecfdf5;
+  --ml-warning: #f59e0b;
+  --ml-warning-light: #fffbeb;
+  --ml-danger: #ef4444;
+  --ml-danger-light: #fef2f2;
+  --ml-info: #0284c7;
+  --ml-info-light: #f0f9ff;
+
+  --ml-badge-bg: #f1f5f9;
+  --ml-badge-text: #475569;
+}
+
+[data-bs-theme="dark"] {
+  --ml-primary: #3b82f6;
+  --ml-primary-hover: #60a5fa;
+  --ml-primary-light: #1e293b;
+  --ml-primary-border: #1d4ed8;
+
+  --ml-bg: #0b1120;
+  --ml-bg-surface: #111827;
+  --ml-bg-elevated: #1f2937;
+  --ml-bg-hover: #1e293b;
+  --ml-bg-active: #334155;
+
+  --ml-border: #1f2937;
+  --ml-border-focus: #60a5fa;
+
+  --ml-text-primary: #f8fafc;
+  --ml-text-secondary: #94a3b8;
+  --ml-text-muted: #64748b;
+  --ml-text-inverse: #0f172a;
+
+  --ml-card-bg: #111827;
+  --ml-card-border: #1f2937;
+  --ml-card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
+  --ml-card-hover-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+
+  --ml-sidebar-bg: #0f172a;
+  --ml-sidebar-border: #1e293b;
+  --ml-sidebar-text: #cbd5e1;
+  --ml-sidebar-hover: #1e293b;
+  --ml-sidebar-active: #1e293b;
+  --ml-sidebar-active-text: #60a5fa;
+
+  --ml-header-bg: rgba(15, 23, 42, 0.95);
+  --ml-header-border: #1e293b;
+
+  --ml-success: #10b981;
+  --ml-success-light: #064e3b;
+  --ml-warning: #f59e0b;
+  --ml-warning-light: #78350f;
+  --ml-danger: #ef4444;
+  --ml-danger-light: #7f1d1d;
+  --ml-info: #38bdf8;
+  --ml-info-light: #0c4a6e;
+
+  --ml-badge-bg: #1e293b;
+  --ml-badge-text: #94a3b8;
+}

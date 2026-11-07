@@ -1,0 +1,16 @@
+{
+  "name": "managelinks",
+  "version": "1.0.0",
+  "description": "Your Links. Your Categories. Your Control. Personal Offline Link Management System.",
+  "type": "module",
+  "scripts": {
+    "test": "node tests/node-runner.js",
+    "start": "npx serve . -l 8080"
+  },
+  "author": "Devraj Chauhan",
+  "license": "MIT",
+  "dependencies": {
+    "bootstrap": "^5.3.8",
+    "jszip": "^3.10.2"
+  }
+}

@@ -1,0 +1,164 @@
+/**
+ * ManageLinks - Responsive Styles
+ * Developer: Devraj Chauhan
+ * Breakpoints: 320px, 375px, 430px, 768px, 1024px, 1366px, 1920px
+ */
+
+/* Mobile Bottom Navigation Bar */
+#mobile-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background-color: var(--ml-header-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid var(--ml-header-border);
+  z-index: 1030;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 0.5rem;
+}
+
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--ml-text-secondary);
+  text-decoration: none;
+  font-size: 0.68rem;
+  font-weight: 500;
+  gap: 0.2rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 8px;
+  transition: color 0.15s ease;
+  flex: 1;
+  text-align: center;
+}
+
+.mobile-nav-item.active {
+  color: var(--ml-primary);
+  font-weight: 600;
+}
+
+/* Floating Action Button (FAB) */
+#fab-add {
+  display: none;
+  position: fixed;
+  bottom: 74px;
+  right: 1.25rem;
+  width: 56px;
+  height: 56px;
+  border-radius: 28px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  border: none;
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.35);
+  align-items: center;
+  justify-content: center;
+  z-index: 1035;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#fab-add:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.45);
+}
+
+#fab-add:active {
+  transform: scale(0.95);
+}
+
+/* Sidebar Backdrop on Mobile */
+#sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1035;
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 991.98px) {
+  #sidebar {
+    transform: translateX(-100%);
+    width: 260px !important;
+  }
+
+  #sidebar.show-mobile {
+    transform: translateX(0);
+  }
+
+  #sidebar-backdrop.show {
+    display: block;
+  }
+
+  #main-wrapper {
+    margin-left: 0 !important;
+  }
+
+  #top-header {
+    padding: 0 1rem;
+  }
+
+  .header-search {
+    max-width: none;
+  }
+
+  .header-search .kbd-shortcut {
+    display: none;
+  }
+
+  #content-area {
+    padding: 1rem;
+    padding-bottom: 80px;
+  }
+
+  #mobile-bottom-nav {
+    display: flex;
+  }
+
+  #fab-add {
+    display: flex;
+  }
+
+  #bulk-bar {
+    bottom: 70px;
+    width: 90%;
+    justify-content: space-between;
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .link-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .category-grid,
+  .collection-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card {
+    padding: 1rem;
+  }
+
+  .stat-card .stat-value {
+    font-size: 1.4rem;
+  }
+
+  .stat-card .stat-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  #top-header .app-title {
+    display: none;
+  }
+}
