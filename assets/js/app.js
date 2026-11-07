@@ -23,6 +23,7 @@ import { FolderModal } from '../../components/folder-modal.js';
 import { CollectionModal } from '../../components/collection-modal.js';
 import { SearchModal } from '../../components/search-modal.js';
 import { ConfirmationModal } from '../../components/confirmation-modal.js';
+import { PdfModal } from '../../components/pdf-modal.js';
 
 // Pages
 import { DashboardPage } from '../../pages/dashboard.js';
@@ -65,6 +66,7 @@ export const App = {
       CollectionModal.init();
       SearchModal.init();
       ConfirmationModal.init();
+      PdfModal.init();
       Toast.init();
 
       // 6. Check PIN Lock
@@ -183,6 +185,10 @@ export const App = {
     document.getElementById('btn-quick-add')?.addEventListener('click', () => LinkModal.openForAdd());
     document.getElementById('fab-add')?.addEventListener('click', () => LinkModal.openForAdd());
 
+    // Export PDF button in Navbar
+    document.getElementById('nav-pdf-btn')?.addEventListener('click', () => PdfModal.open());
+    window.addEventListener('ml-open-pdf-modal', (e) => PdfModal.open(e.detail || {}));
+
     // Search bar click opens Search Modal
     document.getElementById('global-search-input')?.addEventListener('click', () => SearchModal.open());
 
@@ -208,26 +214,49 @@ export const App = {
       Toast.info(`Opened: ${randomLink.title}`);
     });
 
-    // Mobile menu toggle
+    // Universal Sidebar Toggle (Desktop Collapse & Mobile Slide-in)
     const sidebar = document.getElementById('sidebar');
     const backdrop = document.getElementById('sidebar-backdrop');
-    document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
-      sidebar.classList.toggle('show-mobile');
-      backdrop.classList.toggle('show');
-    });
-    backdrop?.addEventListener('click', () => {
+
+    const toggleSidebar = () => {
+      const isDesktop = window.innerWidth >= 992;
+      if (isDesktop) {
+        sidebar.classList.toggle('collapsed');
+        const isCollapsed = sidebar.classList.contains('collapsed');
+        Storage.set('sidebarCollapsed', isCollapsed);
+      } else {
+        const willShow = !sidebar.classList.contains('show-mobile');
+        sidebar.classList.toggle('show-mobile', willShow);
+        backdrop.classList.toggle('show', willShow);
+      }
+    };
+
+    const closeMobileSidebar = () => {
       sidebar.classList.remove('show-mobile');
       backdrop.classList.remove('show');
+    };
+
+    // Navbar toggle button (works everywhere)
+    document.getElementById('sidebar-toggle-btn')?.addEventListener('click', toggleSidebar);
+
+    // Sidebar internal toggle buttons
+    document.getElementById('sidebar-brand-icon')?.addEventListener('click', toggleSidebar);
+    document.getElementById('sidebar-collapse-desktop-btn')?.addEventListener('click', toggleSidebar);
+    document.getElementById('sidebar-close-mobile-btn')?.addEventListener('click', closeMobileSidebar);
+
+    // Backdrop dismissal
+    backdrop?.addEventListener('click', closeMobileSidebar);
+
+    // Auto-close sidebar on mobile when navigating
+    document.querySelectorAll('.sidebar-nav .nav-link-item').forEach(item => {
+      item.addEventListener('click', () => {
+        if (window.innerWidth < 992) {
+          closeMobileSidebar();
+        }
+      });
     });
 
-    // Desktop sidebar collapse toggle
-    document.getElementById('sidebar-toggle-btn')?.addEventListener('click', () => {
-      sidebar.classList.toggle('collapsed');
-      const isCollapsed = sidebar.classList.contains('collapsed');
-      Storage.set('sidebarCollapsed', isCollapsed);
-    });
-
-    if (Storage.get('sidebarCollapsed', false)) {
+    if (window.innerWidth >= 992 && Storage.get('sidebarCollapsed', false)) {
       sidebar.classList.add('collapsed');
     }
   },

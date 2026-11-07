@@ -10,15 +10,20 @@ export const SidebarComponent = {
   render() {
     return `
       <div class="sidebar-brand">
-        <div class="brand-icon">
+        <div class="brand-icon" id="sidebar-brand-icon" title="Toggle Sidebar" style="cursor: pointer;">
           ${Icons.get('bookmark', { size: 20, color: '#fff' })}
         </div>
-        <div class="d-flex flex-column">
+        <div class="d-flex flex-column brand-text">
           <span class="fw-bold fs-6">ManageLinks</span>
           <span class="text-muted" style="font-size: 0.68rem; font-weight: normal;">Your Control</span>
         </div>
-        <button id="sidebar-toggle-btn" class="btn-ml-icon ms-auto d-none d-lg-flex" title="Toggle Sidebar">
+        <!-- Desktop Collapse Button -->
+        <button id="sidebar-collapse-desktop-btn" class="btn-ml-icon ms-auto d-none d-lg-flex" title="Collapse Sidebar">
           ${Icons.get('chevron-down', { size: 16, className: 'rotate-toggle' })}
+        </button>
+        <!-- Mobile Close Button -->
+        <button id="sidebar-close-mobile-btn" class="btn-ml-icon ms-auto d-lg-none" title="Close Sidebar">
+          ${Icons.get('x', { size: 18 })}
         </button>
       </div>
 

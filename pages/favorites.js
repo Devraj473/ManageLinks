@@ -26,12 +26,27 @@ export const FavoritesPage = {
           <h2 class="fw-bold mb-1">${title}</h2>
           <p class="text-secondary mb-0">${desc}</p>
         </div>
+        <div>
+          <button id="btn-fav-pdf-export" class="btn btn-outline-danger btn-sm d-inline-flex align-items-center gap-1" title="Export as Clickable PDF">
+            ${Icons.get('file-text', { size: 16, color: '#dc2626' })}
+            <span>Export ${this.isPinnedMode ? 'Pinned' : 'Favourites'} PDF</span>
+          </button>
+        </div>
       </div>
 
       <div id="favorites-links-area">
         <div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div></div>
       </div>
     `;
+
+    document.getElementById('btn-fav-pdf-export')?.addEventListener('click', () => {
+      window.dispatchEvent(new CustomEvent('ml-open-pdf-modal', {
+        detail: {
+          scope: this.isPinnedMode ? 'pinned' : 'favorites',
+          title: this.isPinnedMode ? 'ManageLinks - Pinned Bookmarks' : 'ManageLinks - Favourite Bookmarks'
+        }
+      }));
+    });
 
     await this.loadLinks();
   },

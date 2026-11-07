@@ -19,14 +19,13 @@ export const FolderModal = {
     const div = document.createElement('div');
     div.innerHTML = `
       <div class="modal fade" id="folderModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content">
-            <div class="modal-header">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+          <form id="folderForm" class="modal-content shadow-lg">
+            <div class="modal-header border-bottom py-3 px-4">
               <h5 class="modal-title fw-bold" id="folderModalTitle">Create Folder</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="folderForm">
-              <div class="modal-body">
+            <div class="modal-body py-3 px-4">
                 <div class="mb-3">
                   <label for="folderName" class="form-label fw-semibold">Folder Name <span class="text-danger">*</span></label>
                   <input type="text" class="form-control" id="folderName" placeholder="e.g. Frontend Resources" required />
@@ -49,12 +48,11 @@ export const FolderModal = {
                   <input type="color" class="form-control form-control-color w-100" id="folderColor" value="#0284c7" />
                 </div>
               </div>
-              <div class="modal-footer">
+              <div class="modal-footer py-2 px-4 border-top bg-light">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="submit" class="btn-ml-primary">Save Folder</button>
               </div>
-            </form>
-          </div>
+          </form>
         </div>
       </div>
     `;

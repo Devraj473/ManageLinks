@@ -40,6 +40,10 @@ export const AllLinksPage = {
           <p class="text-secondary mb-0">Browse, filter, and organize all your saved web resources.</p>
         </div>
         <div class="d-flex gap-2">
+          <button id="btn-page-pdf-export" class="btn btn-outline-danger btn-sm d-inline-flex align-items-center gap-1" title="Export as Clickable PDF">
+            ${Icons.get('file-text', { size: 16, color: '#dc2626' })}
+            <span>Export PDF</span>
+          </button>
           <button id="btn-page-add-link" class="btn-ml-primary">
             ${Icons.get('plus', { size: 16, color: '#fff' })} Add Link
           </button>
@@ -116,6 +120,9 @@ export const AllLinksPage = {
 
   bindControls() {
     document.getElementById('btn-page-add-link')?.addEventListener('click', () => LinkModal.openForAdd());
+    document.getElementById('btn-page-pdf-export')?.addEventListener('click', () => {
+      window.dispatchEvent(new CustomEvent('ml-open-pdf-modal', { detail: { scope: 'all' } }));
+    });
 
     // Search input
     let timer;

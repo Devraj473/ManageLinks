@@ -528,6 +528,23 @@ export const DataManagementPage = {
               </p>
 
               <div class="row g-3">
+                <div class="col-12">
+                  <div class="p-3 border border-danger-subtle bg-danger-subtle bg-opacity-10 rounded d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                      <div class="bg-danger text-white p-2 rounded">
+                        ${Icons.get('file-text', { size: 24, color: '#fff' })}
+                      </div>
+                      <div>
+                        <h6 class="fw-bold mb-1 text-danger">Clickable PDF Document</h6>
+                        <p class="text-secondary small mb-0">Export a beautiful, printable vector PDF or HTML catalog where every website link is 100% clickable.</p>
+                      </div>
+                    </div>
+                    <button id="exp-pdf-btn" class="btn btn-sm btn-danger px-4 fw-semibold">
+                      ${Icons.get('printer', { size: 14, color: '#fff' })} Export Clickable PDF
+                    </button>
+                  </div>
+                </div>
+
                 <div class="col-md-6">
                   <div class="p-3 border rounded h-100 d-flex flex-column justify-content-between">
                     <div>
@@ -574,6 +591,9 @@ export const DataManagementPage = {
       </div>
     `;
 
+    document.getElementById('exp-pdf-btn')?.addEventListener('click', () => {
+      window.dispatchEvent(new CustomEvent('ml-open-pdf-modal', { detail: { scope: 'all' } }));
+    });
     document.getElementById('exp-html-btn')?.addEventListener('click', () => ExportManager.exportToHtml(allLinks));
     document.getElementById('exp-csv-btn')?.addEventListener('click', () => ExportManager.exportToCsv(allLinks));
     document.getElementById('exp-json-btn')?.addEventListener('click', () => ExportManager.exportToJson(allLinks));

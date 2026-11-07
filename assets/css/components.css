@@ -510,3 +510,26 @@
   max-width: 360px;
   width: 90%;
 }
+
+/* Modal Improvements for Visible Sticky Footers */
+.modal-dialog-scrollable .modal-content {
+  max-height: calc(100vh - 3rem);
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden;
+}
+
+.modal-dialog-scrollable .modal-body {
+  overflow-y: auto !important;
+  flex: 1 1 auto;
+  max-height: calc(100vh - 13rem);
+}
+
+.modal-footer {
+  flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
+  background-color: var(--ml-card-bg);
+  z-index: 10;
+  border-top: 1px solid var(--ml-border);
+}

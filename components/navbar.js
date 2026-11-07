@@ -9,10 +9,12 @@ export const NavbarComponent = {
   render() {
     return `
       <div class="d-flex align-items-center gap-2">
-        <button id="mobile-menu-btn" class="btn-ml-icon d-lg-none" title="Menu">
+        <button id="sidebar-toggle-btn" class="btn-ml-icon" title="Toggle Navigation Sidebar">
           ${Icons.get('menu', { size: 20 })}
         </button>
-        <span class="fw-bold fs-6 d-lg-none">ManageLinks</span>
+        <span class="fw-bold fs-6 d-flex align-items-center gap-2 text-dark">
+          <span class="d-none d-sm-inline">ManageLinks</span>
+        </span>
       </div>
 
       <div class="header-search">
@@ -22,6 +24,10 @@ export const NavbarComponent = {
       </div>
 
       <div class="header-actions">
+        <button id="nav-pdf-btn" class="btn-ml-icon text-danger d-inline-flex" title="Export Links as Clickable PDF">
+          ${Icons.get('file-text', { size: 18, color: '#dc2626' })}
+        </button>
+
         <button id="nav-random-btn" class="btn-ml-icon d-none d-sm-inline-flex" title="Open Random Link">
           ${Icons.get('shuffle', { size: 18 })}
         </button>

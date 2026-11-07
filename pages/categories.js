@@ -199,6 +199,10 @@ export const CategoriesPage = {
           <p class="text-secondary mb-0 ms-5">${Security.escapeHtml(category.description || 'Category links collection')}</p>
         </div>
         <div class="d-flex gap-2">
+          <button id="btn-cat-pdf-export" class="btn btn-outline-danger btn-sm d-inline-flex align-items-center gap-1" title="Export this Category as Clickable PDF">
+            ${Icons.get('file-text', { size: 16, color: '#dc2626' })}
+            <span>Export Category PDF</span>
+          </button>
           <button id="btn-cat-add-link" class="btn-ml-primary">
             ${Icons.get('plus', { size: 16, color: '#fff' })} Add to Category
           </button>
@@ -221,6 +225,15 @@ export const CategoriesPage = {
       </div>
     `;
 
+    document.getElementById('btn-cat-pdf-export')?.addEventListener('click', () => {
+      window.dispatchEvent(new CustomEvent('ml-open-pdf-modal', {
+        detail: {
+          scope: 'category-id',
+          categoryId: category.id,
+          title: `${category.name} Bookmarks`
+        }
+      }));
+    });
     document.getElementById('btn-cat-add-link')?.addEventListener('click', () => {
       import('../components/link-modal.js').then(m => m.LinkModal.openForAdd({ categoryId }));
     });

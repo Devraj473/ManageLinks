@@ -19,14 +19,13 @@ export const CategoryModal = {
     const div = document.createElement('div');
     div.innerHTML = `
       <div class="modal fade" id="categoryModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content">
-            <div class="modal-header">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+          <form id="categoryForm" class="modal-content shadow-lg">
+            <div class="modal-header border-bottom py-3 px-4">
               <h5 class="modal-title fw-bold" id="categoryModalTitle">Create Category</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="categoryForm">
-              <div class="modal-body">
+            <div class="modal-body py-3 px-4">
                 <div class="mb-3">
                   <label for="catName" class="form-label fw-semibold">Category Name <span class="text-danger">*</span></label>
                   <input type="text" class="form-control" id="catName" placeholder="e.g. Artificial Intelligence" required />
@@ -67,12 +66,11 @@ export const CategoryModal = {
                   <label class="form-check-label fw-semibold" for="catFavorite">Mark as Favourite Category</label>
                 </div>
               </div>
-              <div class="modal-footer">
+              <div class="modal-footer py-2 px-4 border-top bg-light">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="submit" class="btn-ml-primary">Save Category</button>
               </div>
-            </form>
-          </div>
+          </form>
         </div>
       </div>
     `;

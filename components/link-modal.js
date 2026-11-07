@@ -30,14 +30,13 @@ export const LinkModal = {
     div.innerHTML = `
       <div class="modal fade" id="linkModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-          <div class="modal-content">
-            <div class="modal-header">
+          <form id="linkForm" class="modal-content shadow-lg" novalidate>
+            <div class="modal-header border-bottom py-3 px-4">
               <h5 class="modal-title fw-bold" id="linkModalTitle">Add New Link</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             
-            <form id="linkForm" novalidate>
-              <div class="modal-body">
+            <div class="modal-body py-3 px-4">
                 <!-- Duplicate URL Alert Banner -->
                 <div id="duplicate-warning-banner" class="alert alert-warning d-none d-flex align-items-center justify-content-between py-2 px-3 mb-3">
                   <div class="d-flex align-items-center gap-2">
@@ -196,12 +195,11 @@ export const LinkModal = {
                 </div>
 
               </div>
-              <div class="modal-footer">
+              <div class="modal-footer py-2 px-4 border-top bg-light">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="submit" id="btn-save-link" class="btn-ml-primary">Save Link</button>
               </div>
-            </form>
-          </div>
+          </form>
         </div>
       </div>
     `;
