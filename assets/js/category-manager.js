@@ -82,6 +82,7 @@ export const CategoryManager = {
     };
 
     await db.put('categories', category);
+    window.dispatchEvent(new CustomEvent('ml-category-saved', { detail: category }));
     return category;
   },
 
@@ -99,6 +100,7 @@ export const CategoryManager = {
     };
 
     await db.put('categories', updated);
+    window.dispatchEvent(new CustomEvent('ml-category-saved', { detail: updated }));
     return updated;
   },
 
@@ -140,7 +142,11 @@ export const CategoryManager = {
     });
 
     return new Promise((resolve, reject) => {
-      tx.oncomplete = () => resolve(true);
+      tx.oncomplete = () => {
+        window.dispatchEvent(new CustomEvent('ml-category-deleted', { detail: { id } }));
+        window.dispatchEvent(new CustomEvent('ml-link-saved', { detail: { reassigned: true } }));
+        resolve(true);
+      };
       tx.onerror = () => reject(tx.error);
     });
   },

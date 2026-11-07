@@ -37,6 +37,7 @@ export const UI = {
         if (id) {
           const updated = await LinkManager.toggleFavorite(id);
           Toast.success(updated.isFavorite ? 'Added to Favourites' : 'Removed from Favourites');
+          window.dispatchEvent(new CustomEvent('ml-link-saved', { detail: { id, link: updated } }));
           if (refreshCallback) refreshCallback();
         }
       });
@@ -50,6 +51,7 @@ export const UI = {
         if (id) {
           const updated = await LinkManager.togglePin(id);
           Toast.success(updated.isPinned ? 'Link Pinned' : 'Link Unpinned');
+          window.dispatchEvent(new CustomEvent('ml-link-saved', { detail: { id, link: updated } }));
           if (refreshCallback) refreshCallback();
         }
       });
@@ -63,6 +65,7 @@ export const UI = {
         if (id) {
           const updated = await LinkManager.toggleReadLater(id);
           Toast.success(updated.isReadLater ? 'Added to Read Later' : 'Removed from Read Later');
+          window.dispatchEvent(new CustomEvent('ml-link-saved', { detail: { id, link: updated } }));
           if (refreshCallback) refreshCallback();
         }
       });
@@ -96,6 +99,18 @@ export const UI = {
       });
     });
 
+    // 5b. Share Link
+    container.querySelectorAll('.action-share').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const id = btn.getAttribute('data-id');
+        if (id) {
+          const { ShareModal } = await import('../../components/share-modal.js');
+          ShareModal.openForLink(id);
+        }
+      });
+    });
+
     // 6. Edit Link
     container.querySelectorAll('.action-edit').forEach(btn => {
       btn.addEventListener('click', (e) => {
@@ -120,6 +135,7 @@ export const UI = {
           if (ok) {
             await LinkManager.softDeleteLink(id);
             Toast.info('Link moved to trash');
+            window.dispatchEvent(new CustomEvent('ml-link-deleted', { detail: { id } }));
             if (refreshCallback) refreshCallback();
           }
         }
@@ -134,6 +150,7 @@ export const UI = {
         if (id) {
           const updated = await LinkManager.toggleArchive(id);
           Toast.info(updated.isArchived ? 'Link archived' : 'Link restored from archive');
+          window.dispatchEvent(new CustomEvent('ml-link-saved', { detail: { id, link: updated } }));
           if (refreshCallback) refreshCallback();
         }
       });
@@ -148,8 +165,9 @@ export const UI = {
           const existing = await (await import('./database.js')).db.get('links', id);
           if (existing) {
             const copy = { ...existing, id: null, title: `${existing.title} (Copy)` };
-            await LinkManager.createLink(copy);
+            const saved = await LinkManager.createLink(copy);
             Toast.success('Link duplicated successfully');
+            window.dispatchEvent(new CustomEvent('ml-link-saved', { detail: { link: saved } }));
             if (refreshCallback) refreshCallback();
           }
         }

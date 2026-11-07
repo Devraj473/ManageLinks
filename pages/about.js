@@ -23,9 +23,25 @@ export const AboutPage = {
               Personal, privacy-first offline Progressive Web Application (PWA) for managing, organizing, backing up, and restoring web links across all your personal devices.
             </p>
             <div class="d-flex justify-content-center gap-2">
-              <span class="badge bg-primary-subtle text-primary px-3 py-2">v1.0.0 Production</span>
+              <span class="badge bg-primary-subtle text-primary px-3 py-2">v1.1.0 Production</span>
               <span class="badge bg-success-subtle text-success px-3 py-2">100% Offline-First</span>
               <span class="badge bg-secondary-subtle text-secondary px-3 py-2">Zero Tracking</span>
+            </div>
+
+            <!-- Download, Install, Share Actions -->
+            <div class="d-flex flex-wrap justify-content-center gap-2 mt-4">
+              <button id="about-btn-download-zip" class="btn btn-primary d-inline-flex align-items-center gap-2">
+                ${Icons.get('download', { size: 16, color: '#fff' })}
+                <span>Download Offline Tool (.zip)</span>
+              </button>
+              <button id="about-btn-install-app" class="btn btn-outline-success d-inline-flex align-items-center gap-2">
+                ${Icons.get('smartphone', { size: 16, color: '#16a34a' })}
+                <span>Install PWA App</span>
+              </button>
+              <button id="about-btn-share-app" class="btn btn-outline-primary d-inline-flex align-items-center gap-2">
+                ${Icons.get('share-2', { size: 16, color: 'var(--ml-primary)' })}
+                <span>Share Tool</span>
+              </button>
             </div>
           </div>
 
@@ -135,5 +151,15 @@ export const AboutPage = {
         </div>
       </div>
     `;
+
+    document.getElementById('about-btn-download-zip')?.addEventListener('click', () => {
+      import('../utils/app-downloader.js').then(m => m.AppDownloader.downloadAppZip());
+    });
+    document.getElementById('about-btn-install-app')?.addEventListener('click', () => {
+      import('../assets/js/pwa-installer.js').then(m => m.PwaInstaller.promptInstall());
+    });
+    document.getElementById('about-btn-share-app')?.addEventListener('click', () => {
+      import('../components/share-modal.js').then(m => m.ShareModal.openForApp());
+    });
   }
 };

@@ -24,6 +24,9 @@ import { CollectionModal } from '../../components/collection-modal.js';
 import { SearchModal } from '../../components/search-modal.js';
 import { ConfirmationModal } from '../../components/confirmation-modal.js';
 import { PdfModal } from '../../components/pdf-modal.js';
+import { ShareModal } from '../../components/share-modal.js';
+import { PwaInstaller } from './pwa-installer.js';
+import { AppDownloader } from '../../utils/app-downloader.js';
 
 // Pages
 import { DashboardPage } from '../../pages/dashboard.js';
@@ -67,6 +70,8 @@ export const App = {
       SearchModal.init();
       ConfirmationModal.init();
       PdfModal.init();
+      ShareModal.init();
+      PwaInstaller.init();
       Toast.init();
 
       // 6. Check PIN Lock
@@ -93,11 +98,17 @@ export const App = {
       // 10. Update sidebar badge counts
       SidebarComponent.updateBadges();
 
-      // Listen for data modifications to keep badges updated
-      window.addEventListener('ml-link-saved', () => SidebarComponent.updateBadges());
-      window.addEventListener('ml-category-saved', () => SidebarComponent.updateBadges());
-      window.addEventListener('ml-folder-saved', () => SidebarComponent.updateBadges());
-      window.addEventListener('ml-collection-saved', () => SidebarComponent.updateBadges());
+      // Listen for data modifications to keep badges AND the current view updated in real time!
+      const handleDataChange = () => this.refreshCurrentView();
+      window.addEventListener('ml-link-saved', handleDataChange);
+      window.addEventListener('ml-link-deleted', handleDataChange);
+      window.addEventListener('ml-category-saved', handleDataChange);
+      window.addEventListener('ml-category-deleted', handleDataChange);
+      window.addEventListener('ml-folder-saved', handleDataChange);
+      window.addEventListener('ml-folder-deleted', handleDataChange);
+      window.addEventListener('ml-collection-saved', handleDataChange);
+      window.addEventListener('ml-collection-deleted', handleDataChange);
+      window.addEventListener('ml-data-restored', handleDataChange);
 
       console.log('ManageLinks initialized successfully. Developed by Devraj Chauhan.');
     } catch (err) {
@@ -189,6 +200,21 @@ export const App = {
     document.getElementById('nav-pdf-btn')?.addEventListener('click', () => PdfModal.open());
     window.addEventListener('ml-open-pdf-modal', (e) => PdfModal.open(e.detail || {}));
 
+    // Share Tool & Install buttons
+    document.getElementById('nav-share-app-btn')?.addEventListener('click', () => ShareModal.openForApp());
+    document.getElementById('nav-install-btn')?.addEventListener('click', () => PwaInstaller.promptInstall());
+    document.getElementById('sidebar-share-app-btn')?.addEventListener('click', () => ShareModal.openForApp());
+    document.getElementById('sidebar-install-pwa-btn')?.addEventListener('click', () => PwaInstaller.promptInstall());
+    window.addEventListener('ml-open-share-modal', (e) => {
+      if (e.detail?.linkId) {
+        ShareModal.openForLink(e.detail.linkId);
+      } else {
+        ShareModal.openForApp();
+      }
+    });
+    window.addEventListener('ml-download-offline-app', () => AppDownloader.downloadAppZip());
+    window.addEventListener('ml-prompt-install', () => PwaInstaller.promptInstall());
+
     // Search bar click opens Search Modal
     document.getElementById('global-search-input')?.addEventListener('click', () => SearchModal.open());
 
@@ -258,6 +284,48 @@ export const App = {
 
     if (window.innerWidth >= 992 && Storage.get('sidebarCollapsed', false)) {
       sidebar.classList.add('collapsed');
+    }
+  },
+
+  refreshCurrentView() {
+    SidebarComponent.updateBadges();
+    const route = this.router ? this.router.currentRoute : 'dashboard';
+    const param = this.router ? this.router.currentParam : null;
+
+    if (route === 'all-links' && typeof AllLinksPage.loadLinks === 'function') {
+      AllLinksPage.loadLinks();
+    } else if (route === 'favorites' || route === 'pinned') {
+      if (typeof FavoritesPage.loadLinks === 'function') {
+        FavoritesPage.loadLinks();
+      } else {
+        FavoritesPage.render();
+      }
+    } else if (route === 'inbox') {
+      if (typeof LinkInboxPage.loadInboxLinks === 'function') {
+        LinkInboxPage.loadInboxLinks();
+      } else {
+        LinkInboxPage.render();
+      }
+    } else if (route === 'reading-list') {
+      if (typeof ReadingListPage.loadReadingLinks === 'function') {
+        ReadingListPage.loadReadingLinks();
+      } else {
+        ReadingListPage.render();
+      }
+    } else if (route === 'categories' || route === 'category') {
+      CategoriesPage.render(param);
+    } else if (route === 'folders' || route === 'folder') {
+      FoldersPage.render(param);
+    } else if (route === 'collections' || route === 'collection') {
+      CollectionsPage.render(param);
+    } else if (route === 'dashboard') {
+      DashboardPage.render();
+    } else if (route === 'archive') {
+      ArchivePage.render?.();
+    } else if (route === 'trash') {
+      TrashPage.render?.();
+    } else if (this.router) {
+      this.router.refresh();
     }
   },
 

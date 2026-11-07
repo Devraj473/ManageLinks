@@ -15,6 +15,7 @@ import { Toast } from '../assets/js/notifications.js';
 import { DateUtils } from '../utils/date-utils.js';
 import { FileUtils } from '../utils/file-utils.js';
 import { Security } from '../assets/js/security.js';
+import { AppDownloader } from '../utils/app-downloader.js';
 
 export const DataManagementPage = {
   activeTab: 'backup', // 'backup', 'restore', 'import', 'export'
@@ -199,6 +200,22 @@ export const DataManagementPage = {
               }
             </div>
           </div>
+
+          <!-- Standalone Portable Offline Tool Package -->
+          <div class="card border shadow-sm mt-3 border-primary-subtle bg-primary-subtle bg-opacity-10">
+            <div class="card-header bg-transparent py-3">
+              <h6 class="fw-bold mb-0 text-primary">${Icons.get('download', { size: 16, className: 'me-1' })} Portable Offline Tool (.zip)</h6>
+            </div>
+            <div class="card-body">
+              <p class="small text-secondary mb-3">
+                Download the complete ManageLinks application as a standalone, portable ZIP file. Run it anywhere from a USB drive or local folder with zero server, hosting, or database setup!
+              </p>
+              <button type="button" id="btn-download-app-zip-center" class="btn btn-outline-primary btn-sm w-100 d-inline-flex align-items-center justify-content-center gap-2">
+                ${Icons.get('download', { size: 16 })}
+                <span>Download Standalone Tool (.zip)</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     `;
@@ -217,6 +234,10 @@ export const DataManagementPage = {
       } catch (err) {
         Toast.error(`Backup failed: ${err.message}`);
       }
+    });
+
+    document.getElementById('btn-download-app-zip-center')?.addEventListener('click', () => {
+      AppDownloader.downloadAppZip();
     });
 
     document.getElementById('btn-clear-history')?.addEventListener('click', async () => {
@@ -528,23 +549,6 @@ export const DataManagementPage = {
               </p>
 
               <div class="row g-3">
-                <div class="col-12">
-                  <div class="p-3 border border-danger-subtle bg-danger-subtle bg-opacity-10 rounded d-flex flex-wrap align-items-center justify-content-between gap-3">
-                    <div class="d-flex align-items-center gap-3">
-                      <div class="bg-danger text-white p-2 rounded">
-                        ${Icons.get('file-text', { size: 24, color: '#fff' })}
-                      </div>
-                      <div>
-                        <h6 class="fw-bold mb-1 text-danger">Clickable PDF Document</h6>
-                        <p class="text-secondary small mb-0">Export a beautiful, printable vector PDF or HTML catalog where every website link is 100% clickable.</p>
-                      </div>
-                    </div>
-                    <button id="exp-pdf-btn" class="btn btn-sm btn-danger px-4 fw-semibold">
-                      ${Icons.get('printer', { size: 14, color: '#fff' })} Export Clickable PDF
-                    </button>
-                  </div>
-                </div>
-
                 <div class="col-md-6">
                   <div class="p-3 border rounded h-100 d-flex flex-column justify-content-between">
                     <div>
@@ -591,9 +595,6 @@ export const DataManagementPage = {
       </div>
     `;
 
-    document.getElementById('exp-pdf-btn')?.addEventListener('click', () => {
-      window.dispatchEvent(new CustomEvent('ml-open-pdf-modal', { detail: { scope: 'all' } }));
-    });
     document.getElementById('exp-html-btn')?.addEventListener('click', () => ExportManager.exportToHtml(allLinks));
     document.getElementById('exp-csv-btn')?.addEventListener('click', () => ExportManager.exportToCsv(allLinks));
     document.getElementById('exp-json-btn')?.addEventListener('click', () => ExportManager.exportToJson(allLinks));

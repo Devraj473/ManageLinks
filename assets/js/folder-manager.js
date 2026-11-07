@@ -39,6 +39,7 @@ export const FolderManager = {
     };
 
     await db.put('folders', folder);
+    window.dispatchEvent(new CustomEvent('ml-folder-saved', { detail: folder }));
     return folder;
   },
 
@@ -66,6 +67,7 @@ export const FolderManager = {
     };
 
     await db.put('folders', updated);
+    window.dispatchEvent(new CustomEvent('ml-folder-saved', { detail: updated }));
     return updated;
   },
 
@@ -149,7 +151,10 @@ export const FolderManager = {
     });
 
     return new Promise((resolve, reject) => {
-      tx.oncomplete = () => resolve(true);
+      tx.oncomplete = () => {
+        window.dispatchEvent(new CustomEvent('ml-folder-deleted', { detail: { id } }));
+        resolve(true);
+      };
       tx.onerror = () => reject(tx.error);
     });
   },

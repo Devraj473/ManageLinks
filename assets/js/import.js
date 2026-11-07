@@ -286,10 +286,14 @@ export const ImportManager = {
       await db.putBulk('links', linksToInsert);
     }
 
-    return {
+    const result = {
       success: true,
       importedCount,
       skippedCount
     };
+
+    window.dispatchEvent(new CustomEvent('ml-data-restored', { detail: result }));
+
+    return result;
   }
 };

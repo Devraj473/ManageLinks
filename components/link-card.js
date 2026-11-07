@@ -109,6 +109,10 @@ export const LinkCard = {
                 <li><button class="dropdown-item action-copy" data-id="${link.id}" data-format="title-url">Copy Title & URL</button></li>
               </ul>
             </div>
+
+            <button class="link-action-btn action-share text-primary" data-id="${link.id}" title="Share Link Anywhere">
+              ${Icons.get('share-2', { size: 15 })}
+            </button>
           </div>
 
           <div class="d-flex align-items-center gap-1">
@@ -123,6 +127,7 @@ export const LinkCard = {
               </button>
               <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="font-size: 0.85rem;">
                 <li><button class="dropdown-item action-open-link" data-id="${link.id}">Open in New Tab</button></li>
+                <li><button class="dropdown-item action-share" data-id="${link.id}">Share Link Anywhere...</button></li>
                 <li><button class="dropdown-item action-details" data-id="${link.id}">View Details & Notes</button></li>
                 <li><button class="dropdown-item action-archive" data-id="${link.id}">${link.isArchived ? 'Unarchive' : 'Archive'}</button></li>
                 <li><button class="dropdown-item action-duplicate" data-id="${link.id}">Duplicate Record</button></li>
@@ -172,6 +177,9 @@ export const LinkCard = {
           <button class="link-action-btn action-star ${link.isFavorite ? 'active-star' : ''}" data-id="${link.id}">
             ${Icons.get('star', { size: 16, color: link.isFavorite ? '#f59e0b' : 'currentColor' })}
           </button>
+          <button class="link-action-btn action-share text-primary" data-id="${link.id}" title="Share Link Anywhere">
+            ${Icons.get('share-2', { size: 16 })}
+          </button>
           <button class="link-action-btn action-edit" data-id="${link.id}">
             ${Icons.get('edit', { size: 16 })}
           </button>
@@ -211,6 +219,9 @@ export const LinkCard = {
         </span>
 
         <div class="ms-auto d-flex align-items-center gap-1">
+          <button class="link-action-btn action-share p-1 text-primary" data-id="${link.id}" title="Share Link Anywhere">
+            ${Icons.get('share-2', { size: 14 })}
+          </button>
           <button class="link-action-btn action-edit p-1" data-id="${link.id}">
             ${Icons.get('edit', { size: 14 })}
           </button>

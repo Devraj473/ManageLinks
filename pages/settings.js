@@ -146,6 +146,32 @@ export const SettingsPage = {
             </div>
           </div>
 
+          <!-- Offline Portability & App Installation -->
+          <div class="card border shadow-sm mb-4">
+            <div class="card-header bg-transparent py-3">
+              <h6 class="fw-bold mb-0">${Icons.get('smartphone', { size: 16, className: 'me-1' })} Offline Portability & Installation</h6>
+            </div>
+            <div class="card-body">
+              <p class="small text-secondary mb-3">
+                ManageLinks is 100% serverless. You can install it as a native PWA app on this device or download the entire portable bundle as a ZIP.
+              </p>
+              <div class="d-flex flex-column gap-2">
+                <button type="button" id="settings-install-pwa-btn" class="btn btn-outline-success btn-sm d-flex align-items-center justify-content-center gap-2">
+                  ${Icons.get('smartphone', { size: 16 })}
+                  <span>Install ManageLinks App (PWA)</span>
+                </button>
+                <button type="button" id="settings-download-zip-btn" class="btn btn-outline-primary btn-sm d-flex align-items-center justify-content-center gap-2">
+                  ${Icons.get('download', { size: 16 })}
+                  <span>Download Portable Offline Tool (.zip)</span>
+                </button>
+                <button type="button" id="settings-share-app-btn" class="btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center gap-2">
+                  ${Icons.get('share-2', { size: 16 })}
+                  <span>Share ManageLinks</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
           <!-- Danger Zone -->
           <div class="card border border-danger-subtle shadow-sm">
             <div class="card-header bg-danger-subtle text-danger py-3">
@@ -168,6 +194,17 @@ export const SettingsPage = {
   },
 
   bindEvents(isPinActive) {
+    // Portable & Installation buttons
+    document.getElementById('settings-install-pwa-btn')?.addEventListener('click', () => {
+      import('../assets/js/pwa-installer.js').then(m => m.PwaInstaller.promptInstall());
+    });
+    document.getElementById('settings-download-zip-btn')?.addEventListener('click', () => {
+      import('../utils/app-downloader.js').then(m => m.AppDownloader.downloadAppZip());
+    });
+    document.getElementById('settings-share-app-btn')?.addEventListener('click', () => {
+      import('../components/share-modal.js').then(m => m.ShareModal.openForApp());
+    });
+
     // Theme change
     document.getElementById('setting-theme')?.addEventListener('change', async (e) => {
       await SettingsManager.set('theme', e.target.value);

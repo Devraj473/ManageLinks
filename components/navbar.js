@@ -24,6 +24,14 @@ export const NavbarComponent = {
       </div>
 
       <div class="header-actions">
+        <button id="nav-share-app-btn" class="btn-ml-icon text-primary d-inline-flex" title="Share & Download ManageLinks Tool">
+          ${Icons.get('share-2', { size: 18, color: 'var(--ml-primary)' })}
+        </button>
+
+        <button id="nav-install-btn" class="btn-ml-icon text-success d-inline-flex" title="Install ManageLinks App on Device">
+          ${Icons.get('smartphone', { size: 18, color: '#16a34a' })}
+        </button>
+
         <button id="nav-pdf-btn" class="btn-ml-icon text-danger d-inline-flex" title="Export Links as Clickable PDF">
           ${Icons.get('file-text', { size: 18, color: '#dc2626' })}
         </button>

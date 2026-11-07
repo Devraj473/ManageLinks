@@ -108,6 +108,16 @@ export const SidebarComponent = {
           ${Icons.get('info', { size: 18 })}
           <span>About ManageLinks</span>
         </a>
+
+        <div class="sidebar-category-header">Offline & Portability</div>
+        <a href="javascript:void(0)" class="nav-link-item" id="sidebar-share-app-btn">
+          ${Icons.get('share-2', { size: 18, color: 'var(--ml-primary)' })}
+          <span>Share & Download App</span>
+        </a>
+        <a href="javascript:void(0)" class="nav-link-item btn-install-app" id="sidebar-install-pwa-btn">
+          ${Icons.get('smartphone', { size: 18, color: '#16a34a' })}
+          <span>Install App (PWA)</span>
+        </a>
       </nav>
 
       <div class="sidebar-footer">

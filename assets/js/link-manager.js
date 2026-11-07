@@ -42,6 +42,7 @@ export const LinkManager = {
     };
 
     await db.put('links', record);
+    window.dispatchEvent(new CustomEvent('ml-link-saved', { detail: { link: record, isNew: true } }));
     return record;
   },
 
@@ -63,6 +64,7 @@ export const LinkManager = {
     }
 
     await db.put('links', updated);
+    window.dispatchEvent(new CustomEvent('ml-link-saved', { detail: { link: updated, isNew: false } }));
     return updated;
   },
 
@@ -86,7 +88,10 @@ export const LinkManager = {
     tx.objectStore('deletedItems').put(trashRecord);
 
     return new Promise((resolve, reject) => {
-      tx.oncomplete = () => resolve(true);
+      tx.oncomplete = () => {
+        window.dispatchEvent(new CustomEvent('ml-link-deleted', { detail: { id } }));
+        resolve(true);
+      };
       tx.onerror = () => reject(tx.error);
     });
   },
@@ -104,7 +109,10 @@ export const LinkManager = {
     tx.objectStore('deletedItems').delete(trashId);
 
     return new Promise((resolve, reject) => {
-      tx.oncomplete = () => resolve(link);
+      tx.oncomplete = () => {
+        window.dispatchEvent(new CustomEvent('ml-link-saved', { detail: { link, restored: true } }));
+        resolve(link);
+      };
       tx.onerror = () => reject(tx.error);
     });
   },

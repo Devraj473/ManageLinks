@@ -8,8 +8,10 @@ import { db, generateId } from './database.js';
 import { DateUtils } from '../../utils/date-utils.js';
 import { UrlUtils } from '../../utils/url-utils.js';
 import { FileUtils } from '../../utils/file-utils.js';
+import { Validators } from '../../utils/validators.js';
 import { Encryption } from '../../utils/encryption.js';
 import { BackupManager } from './backup.js';
+import { CategoryManager } from './category-manager.js';
 
 export const RestoreManager = {
   /**
@@ -47,9 +49,14 @@ export const RestoreManager = {
     } else {
       // JSON format
       const text = await FileUtils.readFileAsText(file);
-      const json = JSON.parse(text);
+      let json;
+      try {
+        json = JSON.parse(text);
+      } catch (err) {
+        throw new Error(`JSON parsing failed: ${err.message}`);
+      }
 
-      if (json.encrypted) {
+      if (json && json.encrypted) {
         isEncrypted = true;
         if (!password) {
           return { isEncrypted: true, envelope: json, filename: file.name };
@@ -59,6 +66,9 @@ export const RestoreManager = {
         parsedData = json;
       }
     }
+
+    // Normalize any JSON format (Array of links, official backup package, or bookmark object)
+    parsedData = this.normalizeBackupPayload(parsedData);
 
     // Validate structure
     this.validateBackupData(parsedData);
@@ -83,6 +93,53 @@ export const RestoreManager = {
   },
 
   /**
+   * Normalize arbitrary JSON into standard ManageLinks payload
+   */
+  normalizeBackupPayload(payload) {
+    if (!payload) return { links: [], categories: [], folders: [], collections: [] };
+
+    // 1. If payload is a direct Array of link objects
+    if (Array.isArray(payload)) {
+      return {
+        manifest: {
+          app: 'ManageLinks',
+          version: '1.0.0',
+          backupType: 'links-only',
+          createdAt: DateUtils.now()
+        },
+        links: payload,
+        categories: [],
+        folders: [],
+        collections: [],
+        collectionLinks: []
+      };
+    }
+
+    // 2. If payload has bookmarks or items instead of links
+    if (typeof payload === 'object') {
+      if (!payload.links && Array.isArray(payload.bookmarks)) {
+        payload.links = payload.bookmarks;
+      } else if (!payload.links && Array.isArray(payload.items)) {
+        payload.links = payload.items;
+      }
+
+      payload.manifest = payload.manifest || {
+        app: 'ManageLinks',
+        version: '1.0.0',
+        backupType: 'custom',
+        createdAt: DateUtils.now()
+      };
+      payload.links = Array.isArray(payload.links) ? payload.links : [];
+      payload.categories = Array.isArray(payload.categories) ? payload.categories : [];
+      payload.folders = Array.isArray(payload.folders) ? payload.folders : [];
+      payload.collections = Array.isArray(payload.collections) ? payload.collections : [];
+      payload.collectionLinks = Array.isArray(payload.collectionLinks) ? payload.collectionLinks : [];
+    }
+
+    return payload;
+  },
+
+  /**
    * Validate that the incoming data conforms to ManageLinks structure
    */
   validateBackupData(data) {
@@ -90,11 +147,12 @@ export const RestoreManager = {
       throw new Error('Malformed backup data: Expected valid JSON object');
     }
 
-    if (!data.manifest || data.manifest.app !== 'ManageLinks') {
-      // Fallback for raw arrays or older versions
-      if (!Array.isArray(data.links) && !Array.isArray(data.categories)) {
-        throw new Error('Invalid backup file: ManageLinks signature not recognized');
-      }
+    const hasLinks = Array.isArray(data.links) && data.links.length > 0;
+    const hasCategories = Array.isArray(data.categories) && data.categories.length > 0;
+    const hasFolders = Array.isArray(data.folders) && data.folders.length > 0;
+
+    if (!hasLinks && !hasCategories && !hasFolders) {
+      throw new Error('No valid links, categories, or folders found in this backup file.');
     }
   },
 
@@ -103,9 +161,6 @@ export const RestoreManager = {
    */
   async analyzeDuplicates(incomingData) {
     const existingLinks = await db.getAll('links');
-    const existingCategories = await db.getAll('categories');
-    const existingFolders = await db.getAll('folders');
-
     const linkIdSet = new Set(existingLinks.map(l => l.id));
     const urlMap = new Map();
     existingLinks.forEach(l => urlMap.set(UrlUtils.normalizeUrl(l.url), l));
@@ -114,8 +169,9 @@ export const RestoreManager = {
     const incomingLinks = incomingData.links || [];
 
     incomingLinks.forEach(inLink => {
+      if (!inLink.url) return;
       const norm = UrlUtils.normalizeUrl(inLink.url);
-      if (linkIdSet.has(inLink.id)) {
+      if (inLink.id && linkIdSet.has(inLink.id)) {
         duplicateLinks.push({ incoming: inLink, existing: existingLinks.find(l => l.id === inLink.id), reason: 'ID Match' });
       } else if (urlMap.has(norm)) {
         duplicateLinks.push({ incoming: inLink, existing: urlMap.get(norm), reason: 'URL Match' });
@@ -129,17 +185,98 @@ export const RestoreManager = {
   },
 
   /**
+   * Sanitize an incoming link to guarantee valid IndexedDB key and non-null fields
+   */
+  sanitizeLink(raw) {
+    let url = (raw.url || '').trim();
+    if (!url) return null;
+    url = Validators.ensureProtocol(url);
+    const normalizedUrl = UrlUtils.normalizeUrl(url);
+
+    return {
+      id: (raw.id && typeof raw.id === 'string' && raw.id.trim()) ? raw.id.trim() : generateId(),
+      title: (raw.title || '').trim() || UrlUtils.generateTitleFromUrl(url),
+      url: normalizedUrl,
+      description: (raw.description || '').trim(),
+      categoryId: raw.categoryId || null,
+      folderId: raw.folderId || null,
+      tags: Array.isArray(raw.tags) ? raw.tags.map(t => String(t).trim()).filter(Boolean) : (typeof raw.tags === 'string' ? raw.tags.split(/[,;]/).map(t => t.trim()).filter(Boolean) : []),
+      notes: (raw.notes || '').trim(),
+      isFavorite: !!raw.isFavorite,
+      isPinned: !!raw.isPinned,
+      isArchived: !!raw.isArchived,
+      isReadLater: !!raw.isReadLater,
+      readingStatus: raw.readingStatus || (raw.isReadLater ? 'unread' : 'none'),
+      createdAt: raw.createdAt || DateUtils.now(),
+      updatedAt: DateUtils.now(),
+      lastVisitedAt: raw.lastVisitedAt || null,
+      visitCount: typeof raw.visitCount === 'number' ? raw.visitCount : 0,
+      reviewDate: raw.reviewDate || null,
+      color: raw.color || null,
+      icon: raw.icon || null
+    };
+  },
+
+  sanitizeCategory(raw) {
+    if (!raw) return null;
+    const name = (raw.name || '').trim();
+    if (!name && !raw.id) return null;
+
+    return {
+      id: (raw.id && typeof raw.id === 'string' && raw.id.trim()) ? raw.id.trim() : generateId(),
+      name: name || 'Unnamed Category',
+      description: (raw.description || '').trim(),
+      color: raw.color || '#2563eb',
+      icon: raw.icon || 'folder',
+      isFavorite: !!raw.isFavorite,
+      createdAt: raw.createdAt || DateUtils.now(),
+      updatedAt: DateUtils.now()
+    };
+  },
+
+  sanitizeFolder(raw) {
+    if (!raw) return null;
+    const name = (raw.name || '').trim();
+    if (!name && !raw.id) return null;
+
+    return {
+      id: (raw.id && typeof raw.id === 'string' && raw.id.trim()) ? raw.id.trim() : generateId(),
+      name: name || 'Unnamed Folder',
+      parentId: raw.parentId || null,
+      description: (raw.description || '').trim(),
+      color: raw.color || '#0284c7',
+      createdAt: raw.createdAt || DateUtils.now(),
+      updatedAt: DateUtils.now()
+    };
+  },
+
+  sanitizeCollection(raw) {
+    if (!raw) return null;
+    const name = (raw.name || '').trim();
+    if (!name && !raw.id) return null;
+
+    return {
+      id: (raw.id && typeof raw.id === 'string' && raw.id.trim()) ? raw.id.trim() : generateId(),
+      name: name || 'Unnamed Collection',
+      description: (raw.description || '').trim(),
+      color: raw.color || '#8b5cf6',
+      icon: raw.icon || 'layers',
+      createdAt: raw.createdAt || DateUtils.now(),
+      updatedAt: DateUtils.now()
+    };
+  },
+
+  /**
    * Create an emergency automatic safety backup before performing full replacement
    */
   async createSafetySnapshot() {
-    const snapshot = await BackupManager.gatherBackupData('complete');
-    return snapshot;
+    return await BackupManager.gatherBackupData('complete');
   },
 
   /**
    * Execute Restoration
    * @param {Object} backupData - Validated backup payload
-   * @param {Object} options - mode: 'replace' | 'merge' | 'selective', duplicateAction: 'skip' | 'replace' | 'new', selectiveItems: {...}
+   * @param {Object} options - mode: 'replace' | 'merge', duplicateAction: 'skip' | 'replace' | 'new', createSafety: boolean
    */
   async executeRestore(backupData, options = {}) {
     const { mode = 'merge', duplicateAction = 'skip', createSafety = true } = options;
@@ -150,11 +287,12 @@ export const RestoreManager = {
       safetyBackup = await this.createSafetySnapshot();
     }
 
-    const inLinks = backupData.links || [];
-    const inCategories = backupData.categories || [];
-    const inFolders = backupData.folders || [];
-    const inCollections = backupData.collections || [];
-    const inCollectionLinks = backupData.collectionLinks || [];
+    // Sanitize incoming entities
+    const sanitizedCategories = (backupData.categories || []).map(c => this.sanitizeCategory(c)).filter(Boolean);
+    const sanitizedFolders = (backupData.folders || []).map(f => this.sanitizeFolder(f)).filter(Boolean);
+    const sanitizedCollections = (backupData.collections || []).map(col => this.sanitizeCollection(col)).filter(Boolean);
+    const sanitizedCollectionLinks = (backupData.collectionLinks || []).filter(cl => cl && cl.collectionId && cl.linkId);
+    const sanitizedLinks = (backupData.links || []).map(l => this.sanitizeLink(l)).filter(Boolean);
 
     let restoredLinksCount = 0;
     let skippedCount = 0;
@@ -162,19 +300,33 @@ export const RestoreManager = {
     if (mode === 'replace') {
       // Clear existing stores
       await db.clear('links');
-      await db.clear('categories');
-      await db.clear('folders');
       await db.clear('collections');
       await db.clear('collectionLinks');
 
-      // Put all incoming records
-      if (inCategories.length > 0) await db.putBulk('categories', inCategories);
-      if (inFolders.length > 0) await db.putBulk('folders', inFolders);
-      if (inCollections.length > 0) await db.putBulk('collections', inCollections);
-      if (inCollectionLinks.length > 0) await db.putBulk('collectionLinks', inCollectionLinks);
-      if (inLinks.length > 0) await db.putBulk('links', inLinks);
+      if (sanitizedCategories.length > 0) {
+        await db.clear('categories');
+        await db.putBulk('categories', sanitizedCategories);
+      } else {
+        // Re-seed defaults if categories were empty
+        await CategoryManager.seedDefaults();
+      }
 
-      restoredLinksCount = inLinks.length;
+      if (sanitizedFolders.length > 0) {
+        await db.clear('folders');
+        await db.putBulk('folders', sanitizedFolders);
+      }
+
+      if (sanitizedCollections.length > 0) {
+        await db.putBulk('collections', sanitizedCollections);
+      }
+      if (sanitizedCollectionLinks.length > 0) {
+        await db.putBulk('collectionLinks', sanitizedCollectionLinks);
+      }
+      if (sanitizedLinks.length > 0) {
+        await db.putBulk('links', sanitizedLinks);
+      }
+
+      restoredLinksCount = sanitizedLinks.length;
     } else {
       // Merge mode
       const existingLinks = await db.getAll('links');
@@ -186,34 +338,33 @@ export const RestoreManager = {
       const existingFolderIds = new Set(existingFolders.map(f => f.id));
       const existingColIds = new Set(existingCollections.map(c => c.id));
       const existingUrlMap = new Map();
-      existingLinks.forEach(l => existingUrlMap.set(UrlUtils.normalizeUrl(l.url), l));
+      existingLinks.forEach(l => existingUrlMap.set(l.url, l));
       const existingLinkIdSet = new Set(existingLinks.map(l => l.id));
 
       // 1. Merge Categories
-      const catsToInsert = inCategories.filter(c => !existingCatIds.has(c.id));
+      const catsToInsert = sanitizedCategories.filter(c => !existingCatIds.has(c.id));
       if (catsToInsert.length > 0) await db.putBulk('categories', catsToInsert);
 
       // 2. Merge Folders
-      const foldersToInsert = inFolders.filter(f => !existingFolderIds.has(f.id));
+      const foldersToInsert = sanitizedFolders.filter(f => !existingFolderIds.has(f.id));
       if (foldersToInsert.length > 0) await db.putBulk('folders', foldersToInsert);
 
       // 3. Merge Collections
-      const colsToInsert = inCollections.filter(c => !existingColIds.has(c.id));
+      const colsToInsert = sanitizedCollections.filter(c => !existingColIds.has(c.id));
       if (colsToInsert.length > 0) await db.putBulk('collections', colsToInsert);
 
       // 4. Merge Links according to duplicate policy
       const linksToPut = [];
-      for (const link of inLinks) {
-        const norm = UrlUtils.normalizeUrl(link.url);
+      for (const link of sanitizedLinks) {
         const hasIdMatch = existingLinkIdSet.has(link.id);
-        const hasUrlMatch = existingUrlMap.has(norm);
+        const hasUrlMatch = existingUrlMap.has(link.url);
 
         if (hasIdMatch || hasUrlMatch) {
           if (duplicateAction === 'skip') {
             skippedCount++;
             continue;
           } else if (duplicateAction === 'replace') {
-            const targetId = hasIdMatch ? link.id : existingUrlMap.get(norm).id;
+            const targetId = hasIdMatch ? link.id : existingUrlMap.get(link.url).id;
             linksToPut.push({ ...link, id: targetId, updatedAt: DateUtils.now() });
             restoredLinksCount++;
           } else if (duplicateAction === 'new') {
@@ -232,20 +383,25 @@ export const RestoreManager = {
       }
 
       // Merge collectionLinks
-      if (inCollectionLinks.length > 0) {
-        await db.putBulk('collectionLinks', inCollectionLinks);
+      if (sanitizedCollectionLinks.length > 0) {
+        await db.putBulk('collectionLinks', sanitizedCollectionLinks);
       }
     }
 
-    return {
+    const outcome = {
       success: true,
       mode,
       restoredLinksCount,
       skippedCount,
-      categoriesCount: inCategories.length,
-      foldersCount: inFolders.length,
-      collectionsCount: inCollections.length,
+      categoriesCount: sanitizedCategories.length,
+      foldersCount: sanitizedFolders.length,
+      collectionsCount: sanitizedCollections.length,
       safetyBackupAvailable: !!safetyBackup
     };
+
+    // Dispatch global event so all pages and badges update immediately!
+    window.dispatchEvent(new CustomEvent('ml-data-restored', { detail: outcome }));
+
+    return outcome;
   }
 };

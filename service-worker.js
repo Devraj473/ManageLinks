@@ -4,7 +4,7 @@
  * Caches application shell assets while leaving user IndexedDB data intact
  */
 
-const CACHE_NAME = 'managelinks-shell-v1.1.0';
+const CACHE_NAME = 'managelinks-shell-v1.2.0';
 
 const PRECACHE_ASSETS = [
   './',
@@ -38,6 +38,7 @@ const PRECACHE_ASSETS = [
   './assets/js/shortcuts.js',
   './assets/js/router.js',
   './assets/js/ui.js',
+  './assets/js/pwa-installer.js',
   './components/sidebar.js',
   './components/navbar.js',
   './components/link-card.js',
@@ -48,6 +49,7 @@ const PRECACHE_ASSETS = [
   './components/search-modal.js',
   './components/confirmation-modal.js',
   './components/pdf-modal.js',
+  './components/share-modal.js',
   './components/toast.js',
   './components/empty-state.js',
   './pages/dashboard.js',
@@ -70,6 +72,7 @@ const PRECACHE_ASSETS = [
   './utils/file-utils.js',
   './utils/csv-parser.js',
   './utils/pdf-generator.js',
+  './utils/app-downloader.js',
   './utils/html-bookmark-parser.js',
   './utils/encryption.js',
   './assets/icons/favicon.svg',

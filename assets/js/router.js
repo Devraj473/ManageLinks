@@ -17,6 +17,21 @@ export class Router {
     this.handleRoute();
   }
 
+  refresh() {
+    const rawHash = window.location.hash.slice(1) || 'dashboard';
+    const parts = rawHash.split('/');
+    const route = parts[0] || 'dashboard';
+    const param = parts[1] || null;
+
+    this.currentRoute = route;
+    this.currentParam = param;
+
+    const handler = this.routes[route] || this.routes['dashboard'];
+    if (typeof handler === 'function') {
+      handler(param);
+    }
+  }
+
   navigate(hash) {
     window.location.hash = hash.startsWith('#') ? hash : `#${hash}`;
   }
