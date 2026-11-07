@@ -8,7 +8,7 @@ import { db } from './database.js';
 import { Storage } from './storage.js';
 
 export const DEFAULT_SETTINGS = {
-  theme: 'system', // 'light', 'dark', 'system'
+  theme: 'light', // Default to light mode
   defaultView: 'grid', // 'grid', 'list', 'compact'
   defaultSort: 'newest',
   defaultCategoryId: null,

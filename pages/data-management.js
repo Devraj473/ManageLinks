@@ -98,10 +98,31 @@ export const DataManagementPage = {
 
     container.innerHTML = `
       <div class="row g-4">
+        <!-- 1-Click Fast Backup Banner -->
+        <div class="col-12">
+          <div class="card border border-primary-subtle bg-primary-subtle bg-opacity-10 shadow-sm p-4">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+              <div>
+                <h5 class="fw-bold mb-1 text-primary d-flex align-items-center gap-2">
+                  ${Icons.get('database', { size: 22, color: 'var(--ml-primary)' })}
+                  <span>One-Click Browser Data Backup</span>
+                </h5>
+                <p class="text-secondary small mb-0">
+                  Instantly download all your links, categories, folders, collections, and settings from browser database into a clean JSON file.
+                </p>
+              </div>
+              <button type="button" id="btn-backup-browser-data" class="btn btn-primary px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2">
+                ${Icons.get('download', { size: 18, color: '#fff' })}
+                <span>Backup Browser Data</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div class="col-lg-7">
           <div class="card border shadow-sm">
             <div class="card-header bg-transparent py-3">
-              <h5 class="fw-bold mb-0">Create Backup Package</h5>
+              <h5 class="fw-bold mb-0">Custom Backup Options</h5>
             </div>
             <div class="card-body">
               <form id="backup-form">
@@ -115,19 +136,7 @@ export const DataManagementPage = {
                   </select>
                 </div>
 
-                <div class="mb-3">
-                  <label class="form-label fw-semibold">Package Format</label>
-                  <div class="d-flex gap-3">
-                    <div class="form-check">
-                      <input class="form-check-input" type="radio" name="backupFormat" id="fmtJson" value="json" checked>
-                      <label class="form-check-label" for="fmtJson">Standard JSON (.json)</label>
-                    </div>
-                    <div class="form-check">
-                      <input class="form-check-input" type="radio" name="backupFormat" id="fmtZip" value="zip">
-                      <label class="form-check-label" for="fmtZip">Compressed ZIP Archive (.zip)</label>
-                    </div>
-                  </div>
-                </div>
+                <input type="hidden" id="backupFormat" value="json" />
 
                 <!-- Password Protection Accordion -->
                 <div class="accordion mb-4" id="encAccordion">
@@ -201,39 +210,69 @@ export const DataManagementPage = {
             </div>
           </div>
 
-          <!-- Standalone Portable Offline Tool Package -->
+          <!-- Standalone App (.exe) & Portable Offline Tool Package -->
           <div class="card border shadow-sm mt-3 border-primary-subtle bg-primary-subtle bg-opacity-10">
             <div class="card-header bg-transparent py-3">
-              <h6 class="fw-bold mb-0 text-primary">${Icons.get('download', { size: 16, className: 'me-1' })} Portable Offline Tool (.zip)</h6>
+              <h6 class="fw-bold mb-0 text-primary">${Icons.get('monitor', { size: 16, className: 'me-1' })} Standalone Application (.exe)</h6>
             </div>
             <div class="card-body">
               <p class="small text-secondary mb-3">
-                Download the complete ManageLinks application as a standalone, portable ZIP file. Run it anywhere from a USB drive or local folder with zero server, hosting, or database setup!
+                Download or share the standalone Windows installer (<code>ManageLinks-Setup.exe</code>). Runs completely offline without any database, web server, or internet connection.
               </p>
-              <button type="button" id="btn-download-app-zip-center" class="btn btn-outline-primary btn-sm w-100 d-inline-flex align-items-center justify-content-center gap-2">
-                ${Icons.get('download', { size: 16 })}
-                <span>Download Standalone Tool (.zip)</span>
-              </button>
+              <div class="d-flex flex-column gap-2">
+                <button type="button" id="btn-download-app-exe-center" class="btn btn-primary btn-sm w-100 d-inline-flex align-items-center justify-content-center gap-2 shadow-sm">
+                  ${Icons.get('download', { size: 16, color: '#fff' })}
+                  <span class="fw-bold">Download Windows App (.exe)</span>
+                </button>
+                <button type="button" id="btn-share-app-exe-center" class="btn btn-outline-primary btn-sm w-100 d-inline-flex align-items-center justify-content-center gap-2">
+                  ${Icons.get('share-2', { size: 16 })}
+                  <span>Share Application (.exe)</span>
+                </button>
+                <button type="button" id="btn-download-app-zip-center" class="btn btn-outline-secondary btn-sm w-100 d-inline-flex align-items-center justify-content-center gap-2">
+                  ${Icons.get('folder', { size: 16 })}
+                  <span>Download Portable Tool (.zip)</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
     `;
 
-    document.getElementById('backup-form')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const type = document.getElementById('backup-type').value;
-      const format = document.querySelector('input[name="backupFormat"]:checked').value;
-      const password = document.getElementById('backupPassword').value;
-
+    // One-click Backup Browser Data
+    document.getElementById('btn-backup-browser-data')?.addEventListener('click', async () => {
       try {
-        Toast.info('Generating backup package...');
-        await BackupManager.createBackup({ type, format, password });
-        Toast.success('Backup package downloaded successfully!');
+        Toast.info('Downloading browser database backup...');
+        await BackupManager.backupBrowserData();
+        Toast.success('Browser database backup downloaded successfully!');
         await this.renderBackupTab(container);
       } catch (err) {
         Toast.error(`Backup failed: ${err.message}`);
       }
+    });
+
+    document.getElementById('backup-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const type = document.getElementById('backup-type').value;
+      const format = 'json';
+      const password = document.getElementById('backupPassword').value;
+
+      try {
+        Toast.info('Generating JSON backup file...');
+        await BackupManager.createBackup({ type, format, password });
+        Toast.success('Backup file downloaded successfully!');
+        await this.renderBackupTab(container);
+      } catch (err) {
+        Toast.error(`Backup failed: ${err.message}`);
+      }
+    });
+
+    document.getElementById('btn-download-app-exe-center')?.addEventListener('click', () => {
+      AppDownloader.downloadInstallerExe();
+    });
+
+    document.getElementById('btn-share-app-exe-center')?.addEventListener('click', () => {
+      import('../components/share-modal.js').then(m => m.ShareModal.openForApp());
     });
 
     document.getElementById('btn-download-app-zip-center')?.addEventListener('click', () => {
@@ -260,13 +299,13 @@ export const DataManagementPage = {
             </div>
             <div class="card-body">
               <p class="text-secondary small mb-3">
-                Upload a ManageLinks backup file (.json or .zip). The wizard will inspect the records, detect duplicates, and let you choose how to merge or replace data.
+                Upload your ManageLinks database backup file (.json). The wizard will inspect the records, detect duplicates, and let you choose how to merge or replace data.
               </p>
 
               <!-- File Select Box -->
               <div class="mb-4">
-                <label for="restoreFileInput" class="form-label fw-semibold">Select Backup File</label>
-                <input class="form-control" type="file" id="restoreFileInput" accept=".json,.zip,.mlb" />
+                <label for="restoreFileInput" class="form-label fw-semibold">Select Backup File (.json)</label>
+                <input class="form-control" type="file" id="restoreFileInput" accept=".json,.mlb" />
               </div>
 
               <!-- Password Prompt Box (Hidden initially) -->

@@ -7,6 +7,7 @@ import { Validators } from '../utils/validators.js';
 import { UrlUtils } from '../utils/url-utils.js';
 import { DateUtils } from '../utils/date-utils.js';
 import { CsvParser } from '../utils/csv-parser.js';
+import { ImportManager } from '../assets/js/import.js';
 
 let total = 0;
 let passed = 0;
@@ -80,6 +81,40 @@ async function run() {
   const rows = CsvParser.parse(csv);
   assert(rows.length === 2, 'CSV parses 2 rows back');
   assert(rows[0].url === 'https://test.com', 'CSV URL parsed correctly');
+
+  // Universal JSON Import tests
+  const mlBackup = JSON.stringify({
+    manifest: { version: '1.1.0' },
+    links: [{ title: 'Google', url: 'https://google.com' }],
+    categories: [{ name: 'Search', color: '#2563eb' }]
+  });
+  const res1 = await ImportManager.parseJson(mlBackup);
+  assert(Array.isArray(res1) && res1.length === 1 && ImportManager.stagedCategories?.length === 1, 'Import parses full ManageLinks backup with categories');
+
+  const rawArray = JSON.stringify([{ title: 'GitHub', url: 'https://github.com' }]);
+  const res2 = await ImportManager.parseJson(rawArray);
+  assert(Array.isArray(res2) && res2.length === 1, 'Import parses raw array of bookmarks');
+
+  const chromeBookmarks = JSON.stringify({
+    roots: {
+      bookmark_bar: {
+        children: [
+          { type: 'url', name: 'OpenAI', url: 'https://openai.com' },
+          { type: 'folder', name: 'Dev Tools', children: [{ type: 'url', name: 'Stack Overflow', url: 'https://stackoverflow.com' }] }
+        ]
+      }
+    }
+  });
+  const res3 = await ImportManager.parseJson(chromeBookmarks);
+  assert(Array.isArray(res3) && res3.length === 2, 'Import parses nested Chrome bookmarks tree');
+
+  const customObj = JSON.stringify({ data: [{ title: 'MDN', url: 'https://developer.mozilla.org' }] });
+  const res4 = await ImportManager.parseJson(customObj);
+  assert(Array.isArray(res4) && res4.length === 1, 'Import parses custom object with data array');
+
+  const singleObj = JSON.stringify({ title: 'Anthropic', url: 'https://anthropic.com' });
+  const res5 = await ImportManager.parseJson(singleObj);
+  assert(Array.isArray(res5) && res5.length === 1, 'Import parses single bookmark object');
 
   console.log(`\nResults: ${passed}/${total} passed (${failed} failed)`);
   if (failed > 0) {

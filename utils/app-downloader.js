@@ -86,6 +86,57 @@ export const AppDownloader = {
   ],
 
   /**
+   * Downloads the compiled standalone Windows installer (.exe)
+   */
+  downloadInstallerExe() {
+    try {
+      Toast.info('Downloading ManageLinks-Setup.exe installer...');
+      const a = document.createElement('a');
+      a.href = 'ManageLinks-Setup.exe';
+      a.download = 'ManageLinks-Setup.exe';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      Toast.success('ManageLinks-Setup.exe download started! Run it to automatically install.');
+    } catch (err) {
+      console.error('Download error:', err);
+      Toast.error('Download failed: ' + err.message);
+    }
+  },
+
+  /**
+   * Shares the actual .exe application file directly, or triggers download to send
+   */
+  async shareInstallerExe() {
+    try {
+      Toast.info('Preparing ManageLinks installer for sharing...');
+      const response = await fetch('ManageLinks-Setup.exe');
+      if (!response.ok) {
+        throw new Error('Installer file could not be loaded from server.');
+      }
+      const blob = await response.blob();
+      const exeFile = new File([blob], 'ManageLinks-Setup.exe', { type: 'application/x-msdownload' });
+
+      if (navigator.canShare && navigator.canShare({ files: [exeFile] })) {
+        await navigator.share({
+          files: [exeFile],
+          title: 'ManageLinks Windows Installer',
+          text: 'Here is the standalone installer for ManageLinks. Double-click ManageLinks-Setup.exe to install on your PC!'
+        });
+        Toast.success('Installer shared successfully!');
+        return;
+      }
+    } catch (err) {
+      if (err.name === 'AbortError') return;
+      console.warn('Web Share file error or not supported:', err);
+    }
+
+    // Fallback: download the .exe directly so user can attach/send it via WhatsApp, Telegram, USB, Email
+    this.downloadInstallerExe();
+    Toast.info('ManageLinks-Setup.exe is downloaded! You can attach and send this .exe file to any user.');
+  },
+
+  /**
    * Bundles all app files into a portable ZIP package and initiates download
    */
   async downloadAppZip() {

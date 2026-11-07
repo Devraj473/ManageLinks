@@ -136,15 +136,41 @@ export const BackupManager = {
   },
 
   /**
+   * One-click download of all browser database records as a standalone JSON backup
+   */
+  async backupBrowserData() {
+    const data = await this.gatherBackupData('complete');
+    const dateStamp = DateUtils.formatForFilename();
+    const finalFilename = `ManageLinks_Database_Backup_${dateStamp}.json`;
+    const jsonStr = JSON.stringify(data, null, 2);
+    const blobContent = new Blob([jsonStr], { type: 'application/json' });
+
+    FileUtils.downloadFile(blobContent, finalFilename, 'application/json');
+
+    const historyItem = {
+      id: generateId(),
+      name: finalFilename,
+      type: 'complete',
+      format: 'json',
+      isEncrypted: false,
+      recordCount: (data.links?.length || 0) + (data.categories?.length || 0) + (data.folders?.length || 0),
+      fileSize: FileUtils.formatSize(blobContent.size),
+      sizeBytes: blobContent.size,
+      status: 'Downloaded',
+      createdAt: DateUtils.now()
+    };
+
+    await db.put('backupHistory', historyItem);
+    return historyItem;
+  },
+
+  /**
    * Execute backup download
    */
   async createBackup({ type = 'complete', format = 'json', password = null, selection = {} } = {}) {
     const data = await this.gatherBackupData(type, selection);
     const dateStamp = DateUtils.formatForFilename();
     let filenameBase = `ManageLinks_Backup_${dateStamp}`;
-    let blobContent;
-    let finalFilename;
-    let mimeType;
 
     // Handle Encryption if requested
     let exportData = data;
@@ -153,30 +179,11 @@ export const BackupManager = {
       filenameBase += '_encrypted';
     }
 
-    if (format === 'zip') {
-      // Use JSZip
-      if (typeof window.JSZip === 'undefined') {
-        throw new Error('JSZip library not loaded');
-      }
-      const zip = new window.JSZip();
-      zip.file('manifest.json', JSON.stringify(data.manifest, null, 2));
-
-      if (password && password.trim()) {
-        zip.file('encrypted-data.mlb', JSON.stringify(exportData, null, 2));
-      } else {
-        zip.file('managelinks-data.json', JSON.stringify(data, null, 2));
-      }
-
-      blobContent = await zip.generateAsync({ type: 'blob' });
-      finalFilename = `${filenameBase}.zip`;
-      mimeType = 'application/zip';
-    } else {
-      // JSON format
-      const jsonStr = JSON.stringify(exportData, null, 2);
-      blobContent = new Blob([jsonStr], { type: 'application/json' });
-      finalFilename = `${filenameBase}.json`;
-      mimeType = 'application/json';
-    }
+    // JSON format
+    const jsonStr = JSON.stringify(exportData, null, 2);
+    const blobContent = new Blob([jsonStr], { type: 'application/json' });
+    const finalFilename = `${filenameBase}.json`;
+    const mimeType = 'application/json';
 
     // Trigger download
     FileUtils.downloadFile(blobContent, finalFilename, mimeType);
@@ -186,7 +193,7 @@ export const BackupManager = {
       id: generateId(),
       name: finalFilename,
       type,
-      format,
+      format: 'json',
       isEncrypted: !!(password && password.trim()),
       recordCount: (data.links?.length || 0) + (data.categories?.length || 0),
       fileSize: FileUtils.formatSize(blobContent.size),

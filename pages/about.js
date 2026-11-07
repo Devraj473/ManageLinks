@@ -30,17 +30,21 @@ export const AboutPage = {
 
             <!-- Download, Install, Share Actions -->
             <div class="d-flex flex-wrap justify-content-center gap-2 mt-4">
-              <button id="about-btn-download-zip" class="btn btn-primary d-inline-flex align-items-center gap-2">
+              <button id="about-btn-download-exe" class="btn btn-primary d-inline-flex align-items-center gap-2 shadow-sm">
                 ${Icons.get('download', { size: 16, color: '#fff' })}
-                <span>Download Offline Tool (.zip)</span>
+                <span>Download Windows App (.exe)</span>
+              </button>
+              <button id="about-btn-download-zip" class="btn btn-outline-primary d-inline-flex align-items-center gap-2">
+                ${Icons.get('folder', { size: 16 })}
+                <span>Portable ZIP</span>
               </button>
               <button id="about-btn-install-app" class="btn btn-outline-success d-inline-flex align-items-center gap-2">
                 ${Icons.get('smartphone', { size: 16, color: '#16a34a' })}
-                <span>Install PWA App</span>
+                <span>Install PWA</span>
               </button>
-              <button id="about-btn-share-app" class="btn btn-outline-primary d-inline-flex align-items-center gap-2">
+              <button id="about-btn-share-app" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
                 ${Icons.get('share-2', { size: 16, color: 'var(--ml-primary)' })}
-                <span>Share Tool</span>
+                <span>Share App (.exe)</span>
               </button>
             </div>
           </div>
@@ -152,6 +156,9 @@ export const AboutPage = {
       </div>
     `;
 
+    document.getElementById('about-btn-download-exe')?.addEventListener('click', () => {
+      import('../utils/app-downloader.js').then(m => m.AppDownloader.downloadInstallerExe());
+    });
     document.getElementById('about-btn-download-zip')?.addEventListener('click', () => {
       import('../utils/app-downloader.js').then(m => m.AppDownloader.downloadAppZip());
     });

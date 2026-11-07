@@ -64,9 +64,107 @@ export const ImportManager = {
   parseJson(text) {
     try {
       const data = JSON.parse(text);
-      if (Array.isArray(data)) return data;
-      if (data.links && Array.isArray(data.links)) return data.links;
-      throw new Error('JSON does not contain a list of links');
+
+      // 1. Direct array of items
+      if (Array.isArray(data)) {
+        return data;
+      }
+
+      if (data && typeof data === 'object') {
+        // Stash categories and folders if it's a full backup
+        if (Array.isArray(data.categories)) {
+          this.stagedCategories = data.categories;
+        }
+        if (Array.isArray(data.folders)) {
+          this.stagedFolders = data.folders;
+        }
+
+        // 2. Direct property matches
+        if (Array.isArray(data.links)) return data.links;
+        if (Array.isArray(data.bookmarks)) return data.bookmarks;
+        if (Array.isArray(data.items)) return data.items;
+        if (Array.isArray(data.data)) return data.data;
+        if (Array.isArray(data.records)) return data.records;
+        if (Array.isArray(data.entries)) return data.entries;
+
+        // 3. Chrome / Chromium Bookmarks JSON format (roots.bookmark_bar.children / roots.other.children)
+        if (data.roots && typeof data.roots === 'object') {
+          const chromeLinks = [];
+          const traverseChromeNode = (node, path = []) => {
+            if (!node) return;
+            if (node.type === 'url' && node.url) {
+              chromeLinks.push({
+                title: node.name || '',
+                url: node.url,
+                folderPath: [...path],
+                createdAt: node.date_added ? new Date(node.date_added / 1000).toISOString() : null
+              });
+            } else if (node.type === 'folder' && Array.isArray(node.children)) {
+              const newPath = node.name ? [...path, node.name] : path;
+              node.children.forEach(child => traverseChromeNode(child, newPath));
+            }
+          };
+
+          for (const key of Object.keys(data.roots)) {
+            const rootNode = data.roots[key];
+            if (rootNode && Array.isArray(rootNode.children)) {
+              rootNode.children.forEach(child => traverseChromeNode(child, [rootNode.name || key]));
+            }
+          }
+
+          if (chromeLinks.length > 0) return chromeLinks;
+        }
+
+        // 4. Firefox JSON bookmarks format (children tree)
+        if (Array.isArray(data.children)) {
+          const ffLinks = [];
+          const traverseFfNode = (node, path = []) => {
+            if (!node) return;
+            if (node.uri) {
+              ffLinks.push({
+                title: node.title || '',
+                url: node.uri,
+                folderPath: [...path]
+              });
+            } else if (Array.isArray(node.children)) {
+              const newPath = node.title ? [...path, node.title] : path;
+              node.children.forEach(child => traverseFfNode(child, newPath));
+            }
+          };
+          traverseFfNode(data);
+          if (ffLinks.length > 0) return ffLinks;
+        }
+
+        // 5. Single bookmark object { url: '...' }
+        if (data.url || data.link || data.uri) {
+          return [{
+            url: data.url || data.link || data.uri,
+            title: data.title || data.name || '',
+            description: data.description || '',
+            tags: data.tags || []
+          }];
+        }
+
+        // 6. Deep recursive search for any array containing link-like objects ({ url: '...' })
+        const foundArrays = [];
+        const findArrays = (obj, depth = 0) => {
+          if (!obj || typeof obj !== 'object' || depth > 4) return;
+          for (const k in obj) {
+            if (Array.isArray(obj[k])) {
+              const hasUrls = obj[k].some(item => item && typeof item === 'object' && (item.url || item.link || item.uri));
+              if (hasUrls) foundArrays.push(obj[k]);
+            } else if (typeof obj[k] === 'object') {
+              findArrays(obj[k], depth + 1);
+            }
+          }
+        };
+        findArrays(data);
+        if (foundArrays.length > 0) {
+          return foundArrays.flat();
+        }
+      }
+
+      throw new Error('Could not find any link or bookmark entries in this JSON file.');
     } catch (e) {
       throw new Error(`JSON parsing failed: ${e.message}`);
     }
@@ -211,6 +309,20 @@ export const ImportManager = {
     const existingLinks = await db.getAll('links');
     const existingUrlMap = new Map();
     existingLinks.forEach(l => existingUrlMap.set(UrlUtils.normalizeUrl(l.url), l));
+
+    // Import any staged categories and folders from ManageLinks backup JSON
+    if (this.stagedCategories && this.stagedCategories.length > 0) {
+      const existingCats = await db.getAll('categories');
+      const catIds = new Set(existingCats.map(c => c.id));
+      const catsToInsert = this.stagedCategories.filter(c => c && c.id && !catIds.has(c.id));
+      if (catsToInsert.length > 0) await db.putBulk('categories', catsToInsert);
+    }
+    if (this.stagedFolders && this.stagedFolders.length > 0) {
+      const existingFolds = await db.getAll('folders');
+      const foldIds = new Set(existingFolds.map(f => f.id));
+      const foldsToInsert = this.stagedFolders.filter(f => f && f.id && !foldIds.has(f.id));
+      if (foldsToInsert.length > 0) await db.putBulk('folders', foldsToInsert);
+    }
 
     // Handle nested folder creation if HTML bookmarks have folderPath
     const folderCache = new Map(); // 'ParentPath/FolderName' -> folderId
