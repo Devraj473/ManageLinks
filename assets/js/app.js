@@ -489,4 +489,8 @@ export const App = {
 };
 
 // Start application when DOM is ready
-document.addEventListener('DOMContentLoaded', () => App.init());
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => App.init());
+} else {
+  App.init();
+}

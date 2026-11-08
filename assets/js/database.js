@@ -126,6 +126,10 @@ export class Database {
       request.onsuccess = (event) => {
         this.db = event.target.result;
         this.isOpen = true;
+        this.db.onversionchange = () => {
+          this.db.close();
+          this.isOpen = false;
+        };
         resolve(this.db);
       };
     });
