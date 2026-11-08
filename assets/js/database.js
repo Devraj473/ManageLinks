@@ -5,7 +5,7 @@
  */
 
 export const DB_NAME = 'ManageLinksDB';
-export const DB_VERSION = 2;
+export const DB_VERSION = 3;
 
 export function generateId() {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -114,12 +114,27 @@ export class Database {
         }
 
         // 10. notes store (Personal Notes)
+        let noteStore;
         if (!db.objectStoreNames.contains('notes')) {
-          const noteStore = db.createObjectStore('notes', { keyPath: 'id' });
+          noteStore = db.createObjectStore('notes', { keyPath: 'id' });
           noteStore.createIndex('title', 'title', { unique: false });
+          noteStore.createIndex('folderId', 'folderId', { unique: false });
           noteStore.createIndex('isPinned', 'isPinned', { unique: false });
           noteStore.createIndex('createdAt', 'createdAt', { unique: false });
           noteStore.createIndex('updatedAt', 'updatedAt', { unique: false });
+        } else {
+          noteStore = event.target.transaction.objectStore('notes');
+          if (!noteStore.indexNames.contains('folderId')) {
+            noteStore.createIndex('folderId', 'folderId', { unique: false });
+          }
+        }
+
+        // 11. noteFolders store (Google Drive style Folders for Notes)
+        if (!db.objectStoreNames.contains('noteFolders')) {
+          const nfStore = db.createObjectStore('noteFolders', { keyPath: 'id' });
+          nfStore.createIndex('name', 'name', { unique: false });
+          nfStore.createIndex('parentId', 'parentId', { unique: false });
+          nfStore.createIndex('createdAt', 'createdAt', { unique: false });
         }
       };
 

@@ -357,6 +357,241 @@ export const PdfGenerator = {
     `;
   },
 
+  /**
+   * Generate Clickable PDF for an Individual Personal Note
+   */
+  async generateSingleNotePdf(note, folderName = null) {
+    if (!note) return;
+
+    const createdStr = DateUtils.formatDateTime(note.createdAt);
+    const updatedStr = DateUtils.formatDateTime(note.updatedAt || note.createdAt);
+    const linkedBody = this.linkifyForPdf(note.content || 'No content.');
+
+    const fullHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>${this.escape(note.title)} - ManageLinks Note</title>
+  <style>
+    @page { size: A4; margin: 2cm; }
+    * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      color: #1e293b;
+      background: #ffffff;
+      line-height: 1.6;
+      margin: 0;
+      padding: 2rem;
+    }
+    .note-header {
+      border-bottom: 2px solid #2563eb;
+      padding-bottom: 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+    .note-title {
+      font-size: 26px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 8px 0;
+    }
+    .note-metadata {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 13px;
+      color: #64748b;
+      margin-top: 6px;
+    }
+    .note-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid #e2e8f0;
+    }
+    .note-content {
+      font-size: 15px;
+      color: #334155;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.7;
+      padding: 1rem 0;
+    }
+    .note-content a {
+      color: #2563eb;
+      text-decoration: underline;
+      font-weight: 600;
+    }
+    .note-footer {
+      border-top: 1px solid #e2e8f0;
+      padding-top: 1rem;
+      margin-top: 2rem;
+      font-size: 12px;
+      color: #94a3b8;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+  <div class="note-header">
+    <h1 class="note-title">${this.escape(note.title)}</h1>
+    <div class="note-metadata">
+      ${folderName ? `<span class="note-badge">📁 ${this.escape(folderName)}</span>` : '<span class="note-badge">📁 Root Notes</span>'}
+      ${note.isPinned ? `<span class="note-badge" style="background:#fef3c7; color:#b45309; border-color:#fde68a;">📌 Pinned</span>` : ''}
+      <span><strong>Created:</strong> ${createdStr}</span>
+      <span>&bull;</span>
+      <span><strong>Updated:</strong> ${updatedStr}</span>
+    </div>
+    ${Array.isArray(note.tags) && note.tags.length > 0 ? `
+      <div style="margin-top: 8px;">
+        ${note.tags.map(t => `<span class="note-badge">#${this.escape(t)}</span>`).join(' ')}
+      </div>
+    ` : ''}
+  </div>
+
+  <div class="note-content">${linkedBody}</div>
+
+  <div class="note-footer">
+    <div>ManageLinks Personal Notes &bull; Developed by <strong>Devraj Chauhan</strong></div>
+    <div>All web links in this document are clickable</div>
+  </div>
+</body>
+</html>`;
+
+    this.openPrintWindow(fullHtml, `ManageLinks_Note_${DateUtils.formatForFilename(note.title)}.html`);
+  },
+
+  /**
+   * Generate Clickable PDF containing All Notes on page / folder
+   */
+  async generateNotesCatalogPdf({ notes = [], folderName = 'All Notes' } = {}) {
+    if (!notes || notes.length === 0) return;
+
+    const timestamp = DateUtils.formatDateTime(new Date().toISOString());
+
+    const notesHtml = notes.map((n, idx) => {
+      const createdStr = DateUtils.formatDateTime(n.createdAt);
+      const updatedStr = DateUtils.formatDateTime(n.updatedAt || n.createdAt);
+      const linkedBody = this.linkifyForPdf(n.content || 'No content.');
+
+      return `
+        <div class="note-block" style="margin-bottom: 2.5rem; page-break-inside: avoid; break-inside: avoid; border: 1px solid #e2e8f0; border-radius: 6px; padding: 1.25rem;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
+            <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: #0f172a;">${idx + 1}. ${this.escape(n.title)}</h3>
+            ${n.isPinned ? `<span style="font-size: 11px; background: #fef3c7; color: #b45309; padding: 2px 6px; border-radius: 4px;">📌 Pinned</span>` : ''}
+          </div>
+          <div style="font-size: 12px; color: #64748b; margin-bottom: 12px;">
+            <span><strong>Created:</strong> ${createdStr}</span> &bull; <span><strong>Updated:</strong> ${updatedStr}</span>
+            ${Array.isArray(n.tags) && n.tags.length > 0 ? ` &bull; <span>${n.tags.map(t => '#' + this.escape(t)).join(' ')}</span>` : ''}
+          </div>
+          <div style="font-size: 14px; color: #334155; white-space: pre-wrap; word-break: break-word; line-height: 1.6;">${linkedBody}</div>
+        </div>
+      `;
+    }).join('');
+
+    const fullHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ManageLinks Personal Notes Collection - ${this.escape(folderName)}</title>
+  <style>
+    @page { size: A4; margin: 1.5cm; }
+    * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      color: #1e293b;
+      background: #ffffff;
+      line-height: 1.5;
+      margin: 0;
+      padding: 1.5rem;
+    }
+    .pdf-header {
+      border-bottom: 2px solid #2563eb;
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .pdf-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 4px 0;
+    }
+    .pdf-subtitle {
+      font-size: 13px;
+      color: #64748b;
+      margin: 0;
+    }
+    a { color: #2563eb; text-decoration: underline; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="pdf-header">
+    <div>
+      <h1 class="pdf-title">Personal Notes Catalog</h1>
+      <p class="pdf-subtitle">Folder: <strong>${this.escape(folderName)}</strong> &bull; Total: ${notes.length} notes &bull; Clickable URLs</p>
+    </div>
+    <div style="text-align: right; font-size: 12px; color: #64748b;">
+      <div><strong>Generated:</strong> ${timestamp}</div>
+      <div>ManageLinks by Devraj Chauhan</div>
+    </div>
+  </div>
+
+  ${notesHtml}
+
+  <div style="border-top: 1px solid #e2e8f0; padding-top: 1rem; margin-top: 2rem; font-size: 12px; color: #94a3b8; display: flex; justify-content: space-between;">
+    <div>ManageLinks Personal Notes &bull; Developed by <strong>Devraj Chauhan</strong></div>
+    <div>All links in this PDF are clickable</div>
+  </div>
+</body>
+</html>`;
+
+    this.openPrintWindow(fullHtml, `ManageLinks_Notes_${DateUtils.formatForFilename(folderName)}.html`);
+  },
+
+  openPrintWindow(fullHtml, fallbackFilename) {
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.open();
+      printWindow.document.write(fullHtml);
+      printWindow.document.close();
+      printWindow.focus();
+    } else {
+      const blob = new Blob([fullHtml], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fallbackFilename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  },
+
+  linkifyForPdf(text) {
+    if (!text) return '';
+    let safe = this.escape(text);
+
+    // Markdown links [title](url)
+    safe = safe.replace(/\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+
+    // Raw URLs
+    const urlRegex = /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/gi;
+    safe = safe.replace(urlRegex, (url) => {
+      return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+    });
+
+    return safe;
+  },
+
   escape(str) {
     if (!str) return '';
     return String(str)

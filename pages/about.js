@@ -63,81 +63,154 @@ export const AboutPage = {
             </div>
           </div>
 
-          <!-- Section 2: Complete Data Architecture, Storage & Backup Details (Step-by-Step) -->
+          <!-- Section 2: Data Storage & Comprehensive Step-by-Step Backup Guide -->
           <div class="card border shadow-sm mb-4">
             <div class="card-header bg-transparent py-3">
               <h5 class="fw-bold mb-0 text-primary d-flex align-items-center gap-2">
                 ${Icons.get('database', { size: 18 })}
-                <span>How & Where Your Data is Stored: Step-by-Step Guide</span>
+                <span>Local Data Storage & Step-by-Step Backup Guide</span>
               </h5>
             </div>
             <div class="card-body">
               <p class="text-secondary mb-4">
-                To guarantee full transparency, here is the exact architectural breakdown of where your data lives, how it is safeguarded, and how cross-device transfer operates:
+                ManageLinks is built upon a 100% offline-first architecture. Here is the exact architectural breakdown of where your data lives, all available backup types, and how to safely backup and restore your data across devices:
               </p>
 
-              <!-- Step 1 -->
-              <div class="d-flex gap-3 mb-3">
-                <div class="d-flex align-items-center justify-content-center bg-primary text-white rounded-circle flex-shrink-0" style="width: 32px; height: 32px; font-weight: bold;">
-                  1
+              <!-- Local Storage Architecture Pillars -->
+              <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                  <div class="p-3 bg-light rounded border h-100">
+                    <div class="fw-bold text-dark mb-1 d-flex align-items-center gap-2">
+                      <span class="text-primary">${Icons.get('database', { size: 16 })}</span>
+                      <span>Local Sandboxed IndexedDB</span>
+                    </div>
+                    <p class="small text-secondary mb-0">
+                      All links, personal notes, Google Drive style note folders, categories, and tags are stored in your browser's local <strong>IndexedDB</strong> (<code>ManageLinksDB</code>). No external cloud databases (Firebase, Supabase, MySQL) are ever contacted.
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h6 class="fw-bold text-dark mb-1">Local Sandboxed IndexedDB Storage</h6>
-                  <p class="text-secondary small mb-0">
-                    When you save a link, create a category, or write a note, it is written directly to your browser's persistent <strong>IndexedDB</strong> storage (Database Name: <code>ManageLinksDB</code>). This storage resides physically on your device's hard drive or SSD. No external database, Firebase, Supabase, MySQL, or cloud service is ever contacted.
-                  </p>
-                </div>
-              </div>
-
-              <!-- Step 2 -->
-              <div class="d-flex gap-3 mb-3">
-                <div class="d-flex align-items-center justify-content-center bg-primary text-white rounded-circle flex-shrink-0" style="width: 32px; height: 32px; font-weight: bold;">
-                  2
-                </div>
-                <div>
-                  <h6 class="fw-bold text-dark mb-1">Zero Network Transmission & Zero Telemetry</h6>
-                  <p class="text-secondary small mb-0">
-                    ManageLinks operates 100% client-side via vanilla JavaScript. The application never makes background HTTP requests to inspect URLs, fetch analytics, or sync data. If you disconnect your Wi-Fi, Ethernet, or put your device into Airplane Mode, the software remains 100% operational with zero degradation.
-                  </p>
-                </div>
-              </div>
-
-              <!-- Step 3 -->
-              <div class="d-flex gap-3 mb-3">
-                <div class="d-flex align-items-center justify-content-center bg-primary text-white rounded-circle flex-shrink-0" style="width: 32px; height: 32px; font-weight: bold;">
-                  3
-                </div>
-                <div>
-                  <h6 class="fw-bold text-dark mb-1">Direct Sharing & Explicit Export Only</h6>
-                  <p class="text-secondary small mb-0">
-                    Your data never leaves your device unless you explicitly command it to. When you click <em>Directly Share Backup File</em> or <em>Generate Backup</em>, the application packages your records into a standard JSON file. You can share this file directly via your operating system's native share sheet (WhatsApp, Telegram, Email, Bluetooth, AirDrop) or copy it to a USB drive.
-                  </p>
+                <div class="col-md-6">
+                  <div class="p-3 bg-light rounded border h-100">
+                    <div class="fw-bold text-dark mb-1 d-flex align-items-center gap-2">
+                      <span class="text-success">${Icons.get('shield', { size: 16 })}</span>
+                      <span>Zero Cloud Telemetry</span>
+                    </div>
+                    <p class="small text-secondary mb-0">
+                      Zero tracking scripts, zero background analytics, zero telemetry. The application operates flawlessly in Airplane Mode or without an active internet connection.
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              <!-- Step 4 -->
-              <div class="d-flex gap-3 mb-3">
-                <div class="d-flex align-items-center justify-content-center bg-primary text-white rounded-circle flex-shrink-0" style="width: 32px; height: 32px; font-weight: bold;">
-                  4
-                </div>
-                <div>
-                  <h6 class="fw-bold text-dark mb-1">Client-Side Military-Grade Encryption</h6>
-                  <p class="text-secondary small mb-0">
-                    For sensitive bookmark collections, ManageLinks provides client-side encryption using the standard <strong>Web Crypto API</strong>. Passwords are transformed into cryptographic keys using <strong>PBKDF2</strong> (100,000 rounds of SHA-256) and encrypted with <strong>AES-GCM (256-bit)</strong>. Decryption occurs purely in your browser's memory without passing through any server.
-                  </p>
-                </div>
+              <!-- Available Backup Types Breakdown -->
+              <h6 class="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+                ${Icons.get('file-text', { size: 16, color: 'var(--ml-primary)' })}
+                <span>Available Backup Formats & Types</span>
+              </h6>
+              <div class="table-responsive mb-4">
+                <table class="table table-bordered table-sm small align-middle mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th style="width: 25%;">Backup Type</th>
+                      <th style="width: 15%;">Format</th>
+                      <th>Contents & Recommended Use</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="fw-bold text-primary">Instant Database Backup</td>
+                      <td><code>.json</code></td>
+                      <td>Complete library: All links, personal notes, note folders, categories, and settings in one portable JSON file.</td>
+                    </tr>
+                    <tr>
+                      <td class="fw-bold text-primary">Master ZIP Backup Archive</td>
+                      <td><code>.zip</code></td>
+                      <td>Comprehensive multi-format bundle: includes <code>backup.json</code>, browser-standard <code>bookmarks.html</code>, spreadsheet <code>links.csv</code>, and individual <code>.txt</code> files for each note inside a <code>notes/</code> directory.</td>
+                    </tr>
+                    <tr>
+                      <td class="fw-bold text-primary">Personal Notes Only</td>
+                      <td><code>.json</code></td>
+                      <td>Backs up personal notes, tags, and Google Drive style folder hierarchy only. Ideal when backing up private memos.</td>
+                    </tr>
+                    <tr>
+                      <td class="fw-bold text-primary">Encrypted Military-Grade Backup</td>
+                      <td><code>.json</code></td>
+                      <td>Password-protected archive encrypted via Web Crypto API with PBKDF2 (100,000 rounds) and AES-GCM 256-bit encryption.</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
 
-              <!-- Step 5 -->
-              <div class="d-flex gap-3">
-                <div class="d-flex align-items-center justify-content-center bg-primary text-white rounded-circle flex-shrink-0" style="width: 32px; height: 32px; font-weight: bold;">
-                  5
+              <!-- Step-by-Step Backup Walkthrough -->
+              <h6 class="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+                ${Icons.get('check-circle', { size: 16, color: '#16a34a' })}
+                <span>Step-by-Step Guide: How to Backup Your Data</span>
+              </h6>
+
+              <div class="d-flex flex-column gap-3 mb-4">
+                <!-- Step 1 -->
+                <div class="d-flex gap-3">
+                  <div class="d-flex align-items-center justify-content-center bg-primary text-white rounded-circle flex-shrink-0" style="width: 28px; height: 28px; font-weight: bold; font-size: 0.85rem;">
+                    1
+                  </div>
+                  <div>
+                    <div class="fw-bold text-dark small">Open Database & Backup Center</div>
+                    <p class="text-secondary small mb-0">
+                      Navigate to <strong>Settings &rarr; Database & Backup Center</strong> or click the Database icon in the top navbar.
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h6 class="fw-bold text-dark mb-1">Safe Cross-Device Restoration</h6>
-                  <p class="text-secondary small mb-0">
-                    To move your data to a new computer, laptop, or phone: (a) Export your JSON backup, (b) Transfer the file to the new device via USB, Bluetooth, or local network, (c) Open ManageLinks on the new device, and (d) Use the <strong>Restore Wizard</strong> with Merge or Replace options. An automatic safety snapshot is taken before any restoration.
-                  </p>
+
+                <!-- Step 2 -->
+                <div class="d-flex gap-3">
+                  <div class="d-flex align-items-center justify-content-center bg-primary text-white rounded-circle flex-shrink-0" style="width: 28px; height: 28px; font-weight: bold; font-size: 0.85rem;">
+                    2
+                  </div>
+                  <div>
+                    <div class="fw-bold text-dark small">Select Your Backup Method</div>
+                    <p class="text-secondary small mb-0">
+                      Choose <strong>Download Backup (.json)</strong> for standard JSON, or <strong>Download Master ZIP (.zip)</strong> for the all-inclusive multi-file archive, or configure a custom password in the Encrypted Backup accordion.
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="d-flex gap-3">
+                  <div class="d-flex align-items-center justify-content-center bg-primary text-white rounded-circle flex-shrink-0" style="width: 28px; height: 28px; font-weight: bold; font-size: 0.85rem;">
+                    3
+                  </div>
+                  <div>
+                    <div class="fw-bold text-dark small">Download to Disk or Share Directly</div>
+                    <p class="text-secondary small mb-0">
+                      Click <strong>Download</strong> to save the backup file onto your hard drive or USB flash drive, or click <strong>Directly Share Backup File</strong> to invoke native sharing or send via WhatsApp, Telegram, or Email without manual downloading.
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="d-flex gap-3">
+                  <div class="d-flex align-items-center justify-content-center bg-primary text-white rounded-circle flex-shrink-0" style="width: 28px; height: 28px; font-weight: bold; font-size: 0.85rem;">
+                    4
+                  </div>
+                  <div>
+                    <div class="fw-bold text-dark small">Safe Storage & Retention</div>
+                    <p class="text-secondary small mb-0">
+                      Store your backup file on a USB flash drive, secondary computer, or external disk. Because ManageLinks backups are standard JSON/ZIP, they can be read on Windows, macOS, Linux, Android, and iOS.
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Step 5 -->
+                <div class="d-flex gap-3">
+                  <div class="d-flex align-items-center justify-content-center bg-primary text-white rounded-circle flex-shrink-0" style="width: 28px; height: 28px; font-weight: bold; font-size: 0.85rem;">
+                    5
+                  </div>
+                  <div>
+                    <div class="fw-bold text-dark small">How to Restore on Any Device</div>
+                    <p class="text-secondary small mb-0">
+                      To transfer your data to a new computer or phone, open ManageLinks, go to <strong>Database & Backup Center &rarr; Restore Wizard</strong>, select your <code>.json</code> or <code>.zip</code> file, select <em>Merge</em> or <em>Replace</em>, and click <strong>Execute Restoration</strong>. An automatic emergency safety snapshot is generated before any restoration.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

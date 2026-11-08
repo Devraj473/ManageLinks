@@ -10,6 +10,8 @@ import { Toast } from '../assets/js/notifications.js';
 import { Security } from '../assets/js/security.js';
 import { AppDownloader } from '../utils/app-downloader.js';
 import { PwaInstaller } from '../assets/js/pwa-installer.js';
+import { PdfGenerator } from '../utils/pdf-generator.js';
+import { DateUtils } from '../utils/date-utils.js';
 
 export const ShareModal = {
   modalEl: null,
@@ -237,7 +239,7 @@ export const ShareModal = {
           <div class="row g-2 mb-3">
             <div class="col-6">
               <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(shareMessage)}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-success w-100 d-flex align-items-center justify-content-center gap-2 py-2" style="font-size: 0.88rem;">
-                <span>WhatsApp</span>
+                <span>WhatsApp Message</span>
               </a>
             </div>
             <div class="col-6">
@@ -254,6 +256,16 @@ export const ShareModal = {
               <a href="https://twitter.com/intent/tweet?url=${encodeURIComponent(exeUrl)}&text=${encodeURIComponent('Check out ManageLinks: 100% Offline Personal Link & Bookmark Manager by Devraj Chauhan')}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-dark w-100 d-flex align-items-center justify-content-center gap-2 py-2" style="font-size: 0.88rem;">
                 <span>X (Twitter)</span>
               </a>
+            </div>
+          </div>
+
+          <!-- WhatsApp Direct Document Sharing Guide -->
+          <div class="p-2 mb-3 bg-success-subtle bg-opacity-25 rounded border border-success-subtle small text-secondary">
+            <strong class="text-success d-flex align-items-center gap-1 mb-1">
+              ${Icons.get('info', { size: 14 })} Sending file directly on WhatsApp:
+            </strong>
+            <div style="font-size: 0.78rem;">
+              Click <strong>"Open System Share Sheet"</strong> above and select <strong>WhatsApp</strong> to attach the installer package directly as a document file into any chat!
             </div>
           </div>
 
@@ -334,6 +346,286 @@ export const ShareModal = {
     nativeBtn.className = 'btn btn-primary btn-sm d-inline-flex align-items-center gap-1 shadow-sm';
     nativeBtn.onclick = () => {
       AppDownloader.shareDirectly();
+    };
+
+    this.bsModal.show();
+  },
+
+  /**
+   * Open modal to directly share the Database Backup file
+   * Never downloads the file when opened or shared!
+   */
+  openForBackup(backupData) {
+    if (!this.bsModal) this.init();
+
+    const titleEl = document.getElementById('shareModalTitle');
+    const subtitleEl = document.getElementById('shareModalSubtitle');
+    const bodyEl = document.getElementById('shareModalBody');
+    const nativeBtn = document.getElementById('btn-modal-native-share');
+
+    titleEl.textContent = 'Directly Share Database Backup';
+    subtitleEl.textContent = 'Share complete backup anywhere via System Share, WhatsApp, Telegram, or Email';
+
+    const totalLinks = backupData.totalLinks || 0;
+    const totalNotes = backupData.totalNotes || 0;
+    const totalCats = backupData.totalCategories || 0;
+    const totalFolders = backupData.totalFolders || 0;
+    const sizeStr = backupData.totalSize || '0 KB';
+    const dateStr = backupData.dateStamp || 'today';
+    const jsonStr = backupData.jsonStr || '';
+
+    const shareTitle = `ManageLinks Database Backup (${dateStr})`;
+    const shareMessage = `📦 *ManageLinks Database Backup*\nDeveloper: Devraj Chauhan\n\nBackup Summary:\n• Links: ${totalLinks}\n• Notes: ${totalNotes}\n• Categories: ${totalCats}\n• Folders: ${totalFolders}\n• Backup Size: ${sizeStr}\n\nRestore this file anytime in ManageLinks -> Database & Backup Center -> Restore Wizard.`;
+
+    bodyEl.innerHTML = `
+      <!-- Backup Summary Header -->
+      <div class="p-3 bg-light rounded border mb-3">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="fw-bold fs-6 text-primary">Database Backup Ready</span>
+          <span class="badge bg-success-subtle text-success border border-success-subtle">${sizeStr}</span>
+        </div>
+        <div class="row g-2 text-secondary small">
+          <div class="col-6"><strong>Links:</strong> ${totalLinks}</div>
+          <div class="col-6"><strong>Notes:</strong> ${totalNotes}</div>
+          <div class="col-6"><strong>Categories:</strong> ${totalCats}</div>
+          <div class="col-6"><strong>Folders:</strong> ${totalFolders}</div>
+        </div>
+      </div>
+
+      <!-- Option 1: System Share Sheet (Send Backup File Directly) -->
+      <div class="card border-primary shadow-sm mb-3" style="border-width: 1.5px; background: rgba(37, 99, 235, 0.04);">
+        <div class="card-body p-3">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <div class="d-flex align-items-center gap-2">
+              <span class="text-primary">${Icons.get('share-2', { size: 20 })}</span>
+              <span class="fw-bold text-dark fs-6">Direct System Share (No Download)</span>
+            </div>
+            <span class="badge bg-primary text-white">Direct Transfer</span>
+          </div>
+          <p class="small text-secondary mb-3">
+            Directly invoke the Windows / System Share Sheet to send this <code>.json</code> backup file via Nearby Share, Bluetooth, Mail, or connected apps.
+          </p>
+          <button type="button" id="btn-share-backup-native" class="btn btn-primary w-100 py-2 d-flex align-items-center justify-content-center gap-2 shadow-sm">
+            ${Icons.get('share-2', { size: 18, color: '#fff' })}
+            <span class="fw-bold">Open System Share Sheet</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Option 2: 1-Click Platform Sharing -->
+      <div class="card border shadow-sm mb-3">
+        <div class="card-body p-3">
+          <label class="form-label fw-bold text-dark small text-uppercase mb-2 d-flex align-items-center gap-1">
+            ${Icons.get('send', { size: 14 })} <span>Share Backup Summary & Data</span>
+          </label>
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(shareMessage)}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-success w-100 d-flex align-items-center justify-content-center gap-2 py-2" style="font-size: 0.88rem;">
+                <span>WhatsApp</span>
+              </a>
+            </div>
+            <div class="col-6">
+              <a href="https://t.me/share/url?url=${encodeURIComponent(window.location.href.split('#')[0])}&text=${encodeURIComponent(shareMessage)}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-info w-100 d-flex align-items-center justify-content-center gap-2 py-2" style="font-size: 0.88rem;">
+                <span>Telegram</span>
+              </a>
+            </div>
+            <div class="col-12">
+              <a href="mailto:?subject=${encodeURIComponent(shareTitle)}&body=${encodeURIComponent(shareMessage)}" class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2 py-2" style="font-size: 0.88rem;">
+                <span>Email Backup Summary</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Copy Backup JSON directly -->
+          <button type="button" id="btn-copy-backup-json" class="btn btn-outline-primary w-100 py-2 d-flex align-items-center justify-content-center gap-2">
+            ${Icons.get('copy', { size: 16 })}
+            <span class="fw-semibold">Copy Full Backup JSON to Clipboard</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Option 3: Download File to Disk (Optional) -->
+      <div class="card border border-secondary-subtle bg-light shadow-sm">
+        <div class="card-body p-3">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <div class="fw-semibold small text-dark">Save Backup File to Hard Drive</div>
+              <div class="text-muted small" style="font-size: 0.76rem;">Only click if you want to physically download the .json file</div>
+            </div>
+            <button type="button" id="btn-download-backup-modal" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1">
+              ${Icons.get('download', { size: 14 })}
+              <span>Download .JSON</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Native share handler
+    document.getElementById('btn-share-backup-native')?.addEventListener('click', async () => {
+      if (navigator.canShare && navigator.canShare({ files: [backupData.backupFile] })) {
+        try {
+          await navigator.share({
+            files: [backupData.backupFile],
+            title: shareTitle,
+            text: shareMessage
+          });
+          Toast.success('Backup file shared successfully!');
+          return;
+        } catch (err) {
+          if (err.name === 'AbortError') return;
+          console.warn('Native share aborted or error:', err);
+        }
+      }
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: shareTitle,
+            text: shareMessage
+          });
+          Toast.success('Backup summary shared!');
+          return;
+        } catch (e) {
+          if (e.name === 'AbortError') return;
+        }
+      }
+
+      Toast.info('System share not supported in this browser. Use WhatsApp, Telegram, or Copy JSON options!');
+    });
+
+    // Copy JSON to clipboard
+    document.getElementById('btn-copy-backup-json')?.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(jsonStr);
+        Toast.success('Full backup JSON copied to clipboard!');
+      } catch {
+        Toast.info('Backup JSON ready');
+      }
+    });
+
+    // Explicit download button
+    document.getElementById('btn-download-backup-modal')?.addEventListener('click', () => {
+      import('../utils/file-utils.js').then(m => {
+        m.FileUtils.downloadFile(backupData.blobContent, backupData.finalFilename, 'application/json');
+        Toast.success('Backup file downloaded to disk!');
+      });
+    });
+
+    // Footer native share button
+    nativeBtn.classList.remove('d-none');
+    nativeBtn.classList.add('d-inline-flex');
+    nativeBtn.innerHTML = `${Icons.get('share-2', { size: 14, color: '#fff' })} <span>System Share</span>`;
+    nativeBtn.className = 'btn btn-primary btn-sm d-inline-flex align-items-center gap-1 shadow-sm';
+    nativeBtn.onclick = () => {
+      document.getElementById('btn-share-backup-native')?.click();
+    };
+
+    this.bsModal.show();
+  },
+
+  /**
+   * Open modal to directly share a Personal Note
+   */
+  openForNote(note, folderName = null) {
+    if (!this.bsModal) this.init();
+
+    const titleEl = document.getElementById('shareModalTitle');
+    const subtitleEl = document.getElementById('shareModalSubtitle');
+    const bodyEl = document.getElementById('shareModalBody');
+    const nativeBtn = document.getElementById('btn-modal-native-share');
+
+    titleEl.textContent = 'Share Personal Note';
+    subtitleEl.textContent = note.title || 'Untitled Note';
+
+    const createdStr = DateUtils.formatDateTime(note.createdAt);
+    const updatedStr = DateUtils.formatDateTime(note.updatedAt || note.createdAt);
+    const tagsStr = Array.isArray(note.tags) && note.tags.length > 0 ? note.tags.map(t => '#' + t).join(' ') : '';
+    const shareText = `📝 *${note.title}*\n${folderName ? `📁 Folder: ${folderName}\n` : ''}Created: ${createdStr}\n${tagsStr ? `Tags: ${tagsStr}\n` : ''}\n----------------------------------\n${note.content || ''}\n----------------------------------\nShared via ManageLinks by Devraj Chauhan`;
+
+    bodyEl.innerHTML = `
+      <!-- Note Preview Box -->
+      <div class="p-3 bg-light rounded border mb-3">
+        <div class="fw-bold fs-6 text-primary mb-1">${Security.escapeHtml(note.title)}</div>
+        <div class="small text-muted mb-2">
+          <span>Created: ${createdStr}</span> &bull; <span>Updated: ${updatedStr}</span>
+        </div>
+        <div class="small text-secondary" style="max-height: 120px; overflow-y: auto; white-space: pre-wrap;">
+          ${Security.escapeHtml(note.content || 'No content.')}
+        </div>
+      </div>
+
+      <!-- Quick Actions Grid -->
+      <div class="mb-3">
+        <label class="form-label fw-bold text-dark small text-uppercase mb-2 d-flex align-items-center gap-1">
+          ${Icons.get('send', { size: 14 })} <span>Share Note to Platform</span>
+        </label>
+        <div class="row g-2">
+          <div class="col-6">
+            <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-success w-100 d-flex align-items-center justify-content-center gap-2 py-2" style="font-size: 0.88rem;">
+              <span>WhatsApp</span>
+            </a>
+          </div>
+          <div class="col-6">
+            <a href="https://t.me/share/url?url=${encodeURIComponent(window.location.href.split('#')[0])}&text=${encodeURIComponent(shareText)}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-info w-100 d-flex align-items-center justify-content-center gap-2 py-2" style="font-size: 0.88rem;">
+              <span>Telegram</span>
+            </a>
+          </div>
+          <div class="col-12">
+            <a href="mailto:?subject=${encodeURIComponent(note.title)}&body=${encodeURIComponent(shareText.replace(/\*/g, ''))}" class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2 py-2" style="font-size: 0.88rem;">
+              <span>Email Note</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Additional Actions: Copy Text & Export PDF -->
+      <div class="row g-2 mb-2">
+        <div class="col-6">
+          <button type="button" id="btn-copy-note-text-modal" class="btn btn-outline-primary w-100 py-2 d-flex align-items-center justify-content-center gap-1">
+            ${Icons.get('copy', { size: 15 })}
+            <span class="small fw-semibold">Copy Note Text</span>
+          </button>
+        </div>
+        <div class="col-6">
+          <button type="button" id="btn-export-note-pdf-modal" class="btn btn-outline-danger w-100 py-2 d-flex align-items-center justify-content-center gap-1">
+            ${Icons.get('file-text', { size: 15 })}
+            <span class="small fw-semibold">Export as PDF</span>
+          </button>
+        </div>
+      </div>
+    `;
+
+    // Copy note text
+    document.getElementById('btn-copy-note-text-modal')?.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(`${note.title}\n\n${note.content || ''}`);
+        Toast.success('Note text copied to clipboard!');
+      } catch {
+        Toast.info('Note copied');
+      }
+    });
+
+    // Export note PDF
+    document.getElementById('btn-export-note-pdf-modal')?.addEventListener('click', () => {
+      PdfGenerator.generateSingleNotePdf(note, folderName);
+    });
+
+    // Footer native share button
+    nativeBtn.classList.remove('d-none');
+    nativeBtn.classList.add('d-inline-flex');
+    nativeBtn.innerHTML = `${Icons.get('share-2', { size: 14, color: '#fff' })} <span>System Share</span>`;
+    nativeBtn.className = 'btn btn-primary btn-sm d-inline-flex align-items-center gap-1 shadow-sm';
+    nativeBtn.onclick = async () => {
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: note.title,
+            text: shareText
+          });
+          Toast.success('Note shared via system sheet!');
+        } catch {}
+      }
     };
 
     this.bsModal.show();

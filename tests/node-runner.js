@@ -126,6 +126,13 @@ async function run() {
   const parsedTags = testTagsRaw.split(',').map(t => t.trim()).filter(Boolean);
   assert(parsedTags.length === 4 && parsedTags[2] === 'dev', 'Note tags comma-separated parser');
 
+  // Note linkify clickable links test
+  const sampleNoteText = 'Check out https://github.com/manage and [OpenAI](https://openai.com) for details.';
+  let safeLinkified = sampleNoteText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  safeLinkified = safeLinkified.replace(/\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+  safeLinkified = safeLinkified.replace(/(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/gi, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+  assert(safeLinkified.includes('href="https://github.com/manage"') && safeLinkified.includes('>OpenAI</a>'), 'Note linkify creates clickable links from raw URLs and markdown');
+
   console.log(`\nResults: ${passed}/${total} passed (${failed} failed)`);
   if (failed > 0) {
     process.exit(1);

@@ -331,6 +331,10 @@ export const RestoreManager = {
         await db.clear('notes');
         await db.putBulk('notes', backupData.notes);
       }
+      if (Array.isArray(backupData.noteFolders) && backupData.noteFolders.length > 0) {
+        await db.clear('noteFolders');
+        await db.putBulk('noteFolders', backupData.noteFolders);
+      }
 
       restoredLinksCount = sanitizedLinks.length;
     } else {
@@ -400,6 +404,16 @@ export const RestoreManager = {
         const notesToPut = backupData.notes.filter(n => !existingNoteIds.has(n.id));
         if (notesToPut.length > 0) {
           await db.putBulk('notes', notesToPut);
+        }
+      }
+
+      // Merge Note Folders
+      if (Array.isArray(backupData.noteFolders) && backupData.noteFolders.length > 0) {
+        const existingNoteFolders = await db.getAll('noteFolders');
+        const existingNfIds = new Set(existingNoteFolders.map(f => f.id));
+        const nfToPut = backupData.noteFolders.filter(f => !existingNfIds.has(f.id));
+        if (nfToPut.length > 0) {
+          await db.putBulk('noteFolders', nfToPut);
         }
       }
     }

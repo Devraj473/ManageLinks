@@ -11,6 +11,7 @@ import { RestoreManager } from '../assets/js/restore.js';
 import { ImportManager } from '../assets/js/import.js';
 import { ExportManager } from '../assets/js/export.js';
 import { ConfirmationModal } from '../components/confirmation-modal.js';
+import { ShareModal } from '../components/share-modal.js';
 import { Toast } from '../assets/js/notifications.js';
 import { DateUtils } from '../utils/date-utils.js';
 import { FileUtils } from '../utils/file-utils.js';
@@ -38,22 +39,6 @@ export const DataManagementPage = {
         </div>
       </div>
 
-      <!-- Quick Navigation Anchor Pills -->
-      <div class="d-flex flex-wrap gap-2 mb-4">
-        <a href="#sec-backup-center" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1">
-          ${Icons.get('download', { size: 14 })} <span>1. Backup & Direct Share</span>
-        </a>
-        <a href="#sec-restore-wizard" class="btn btn-sm btn-outline-success d-inline-flex align-items-center gap-1">
-          ${Icons.get('refresh-cw', { size: 14 })} <span>2. Restore Wizard</span>
-        </a>
-        <a href="#sec-import-center" class="btn btn-sm btn-outline-info d-inline-flex align-items-center gap-1">
-          ${Icons.get('upload', { size: 14 })} <span>3. Import Bookmarks</span>
-        </a>
-        <a href="#sec-export-center" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1">
-          ${Icons.get('share-2', { size: 14 })} <span>4. Export Formats</span>
-        </a>
-      </div>
-
       <!-- ========================================================= -->
       <!-- SECTION 1: ONE-CLICK BACKUP & DIRECT SHARE -->
       <!-- ========================================================= -->
@@ -72,7 +57,7 @@ export const DataManagementPage = {
                 <span>Instant Browser Database Backup</span>
               </h5>
               <p class="text-secondary small mb-0">
-                Generate a clean, complete JSON backup of all links, categories, folders, collections, personal notes, and settings.
+                Generate a clean, complete backup of all links, personal notes, note folders, categories, and settings.
               </p>
             </div>
             <div class="d-flex flex-wrap gap-2">
@@ -81,10 +66,15 @@ export const DataManagementPage = {
                 ${Icons.get('share-2', { size: 18, color: '#fff' })}
                 <span>Directly Share Backup File</span>
               </button>
-              <!-- Download Button -->
+              <!-- Download JSON Button -->
               <button type="button" id="btn-backup-browser-data" class="btn btn-primary px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm">
                 ${Icons.get('download', { size: 18, color: '#fff' })}
                 <span>Download Backup (.json)</span>
+              </button>
+              <!-- Download Master ZIP Package -->
+              <button type="button" id="btn-backup-zip-package" class="btn btn-outline-primary px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm bg-white">
+                ${Icons.get('folder', { size: 18 })}
+                <span>Download Master ZIP (.zip)</span>
               </button>
             </div>
           </div>
@@ -103,6 +93,7 @@ export const DataManagementPage = {
                     <label class="form-label fw-semibold">Backup Scope</label>
                     <select class="form-select" id="backup-type">
                       <option value="complete">Complete Library (Links, Notes, Categories, Folders, Collections)</option>
+                      <option value="notes-only">Personal Notes & Note Folders Only</option>
                       <option value="links-only">Links Only</option>
                       <option value="categories-folders">Categories & Folders Only</option>
                       <option value="favorites-only">Favourites Only</option>
@@ -136,9 +127,10 @@ export const DataManagementPage = {
                     <div class="fw-semibold small mb-2">Live Database Statistics:</div>
                     <div class="d-flex flex-wrap gap-3 small text-secondary">
                       <span><strong>Links:</strong> ${preview.totalLinks}</span>
+                      <span><strong>Personal Notes:</strong> ${preview.totalNotes || 0}</span>
+                      <span><strong>Note Folders:</strong> ${preview.totalNoteFolders || 0}</span>
                       <span><strong>Categories:</strong> ${preview.totalCategories}</span>
                       <span><strong>Folders:</strong> ${preview.totalFolders}</span>
-                      <span><strong>Collections:</strong> ${preview.totalCollections}</span>
                       <span><strong>Estimated Size:</strong> ${preview.estimatedSize}</span>
                     </div>
                   </div>
@@ -205,8 +197,8 @@ export const DataManagementPage = {
               <div class="col-lg-6">
                 <!-- File Select Box -->
                 <div class="mb-3">
-                  <label for="restoreFileInput" class="form-label fw-semibold">Select Backup File (.json)</label>
-                  <input class="form-control" type="file" id="restoreFileInput" accept=".json,.mlb" />
+                  <label for="restoreFileInput" class="form-label fw-semibold">Select Backup File (.json, .zip, or .mlb)</label>
+                  <input class="form-control" type="file" id="restoreFileInput" accept=".json,.mlb,.zip" />
                 </div>
 
                 <!-- Password Prompt Box (Hidden initially) -->
@@ -420,21 +412,26 @@ export const DataManagementPage = {
       }
     });
 
-    // 2. Direct Share Backup File
+    // 2. Direct Share Backup File (Opens share sheet / modal without downloading!)
     document.getElementById('btn-share-backup-direct')?.addEventListener('click', async () => {
       try {
-        Toast.info('Preparing database backup for direct sharing...');
-        const res = await BackupManager.shareBackupData();
-        if (res.success) {
-          if (res.method === 'native') {
-            Toast.success('Database backup shared successfully!');
-          } else {
-            Toast.info('Database backup file downloaded ready to send anywhere!');
-          }
-          await this.render();
-        }
+        Toast.info('Preparing database backup for sharing...');
+        const payload = await BackupManager.prepareBackupForSharing();
+        ShareModal.openForBackup(payload);
       } catch (err) {
         Toast.error(`Direct share failed: ${err.message}`);
+      }
+    });
+
+    // 3. Download Master ZIP Package
+    document.getElementById('btn-backup-zip-package')?.addEventListener('click', async () => {
+      try {
+        Toast.info('Generating Master ZIP backup archive with files...');
+        await BackupManager.createZipBackup({ type: 'complete' });
+        Toast.success('Master ZIP backup archive downloaded successfully!');
+        await this.render();
+      } catch (err) {
+        Toast.error(`ZIP backup failed: ${err.message}`);
       }
     });
 

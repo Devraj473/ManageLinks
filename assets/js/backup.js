@@ -1,13 +1,15 @@
 /**
  * ManageLinks - Backup Center
  * Developer: Devraj Chauhan
- * Handles Complete & Selective Backups, JSON, ZIP, and PBKDF2+AES-GCM Encryption
+ * Handles Complete & Selective Backups, Notes Backups, JSON, Master ZIP Packages, and PBKDF2+AES-GCM Encryption
  */
 
 import { db, generateId } from './database.js';
 import { DateUtils } from '../../utils/date-utils.js';
 import { FileUtils } from '../../utils/file-utils.js';
 import { Encryption } from '../../utils/encryption.js';
+import { CsvParser } from '../../utils/csv-parser.js';
+import { HtmlBookmarkParser } from '../../utils/html-bookmark-parser.js';
 
 export const BackupManager = {
   /**
@@ -24,10 +26,14 @@ export const BackupManager = {
       totalCategories: data.categories?.length || 0,
       totalFolders: data.folders?.length || 0,
       totalCollections: data.collections?.length || 0,
+      totalNotes: data.notes?.length || 0,
+      totalNoteFolders: data.noteFolders?.length || 0,
       totalRecords: (data.links?.length || 0) + 
                     (data.categories?.length || 0) + 
                     (data.folders?.length || 0) + 
-                    (data.collections?.length || 0),
+                    (data.collections?.length || 0) +
+                    (data.notes?.length || 0) +
+                    (data.noteFolders?.length || 0),
       estimatedSize: FileUtils.formatSize(estimatedBytes),
       estimatedBytes,
       data
@@ -53,16 +59,32 @@ export const BackupManager = {
     let collections = await db.getAll('collections');
     let collectionLinks = await db.getAll('collectionLinks');
     let notes = await db.getAll('notes');
+    let noteFolders = [];
+    try {
+      noteFolders = await db.getAll('noteFolders');
+    } catch {
+      noteFolders = [];
+    }
     let settings = await db.getAll('settings');
     let deletedItems = await db.getAll('deletedItems');
 
     switch (type) {
+      case 'notes-only':
+        links = [];
+        categories = [];
+        folders = [];
+        collections = [];
+        collectionLinks = [];
+        deletedItems = [];
+        break;
+
       case 'links-only':
         categories = [];
         folders = [];
         collections = [];
         collectionLinks = [];
         notes = [];
+        noteFolders = [];
         deletedItems = [];
         break;
 
@@ -71,6 +93,7 @@ export const BackupManager = {
         collections = [];
         collectionLinks = [];
         notes = [];
+        noteFolders = [];
         deletedItems = [];
         break;
 
@@ -83,6 +106,7 @@ export const BackupManager = {
         collections = [];
         collectionLinks = [];
         notes = [];
+        noteFolders = [];
         deletedItems = [];
         break;
 
@@ -94,6 +118,7 @@ export const BackupManager = {
           collections = [];
           collectionLinks = [];
           notes = [];
+          noteFolders = [];
           deletedItems = [];
         }
         break;
@@ -106,6 +131,7 @@ export const BackupManager = {
           collections = [];
           collectionLinks = [];
           notes = [];
+          noteFolders = [];
           deletedItems = [];
         }
         break;
@@ -120,13 +146,14 @@ export const BackupManager = {
           categories = [];
           folders = [];
           notes = [];
+          noteFolders = [];
           deletedItems = [];
         }
         break;
 
       case 'complete':
       default:
-        // Everything included
+        // Everything included: links, categories, folders, collections, notes, noteFolders, settings
         break;
     }
 
@@ -138,6 +165,7 @@ export const BackupManager = {
       collections,
       collectionLinks,
       notes,
+      noteFolders,
       settings,
       deletedItems
     };
@@ -173,9 +201,141 @@ export const BackupManager = {
   },
 
   /**
-   * Directly share the complete database backup file via Web Share API
+   * Bundles all data into a Complete ZIP Backup Package:
+   * - backup.json (Full database restore package)
+   * - manifest.json (Metadata)
+   * - bookmarks.html (Netscape standard bookmarks)
+   * - links.csv (Spreadsheet export)
+   * - notes/ directory containing individual text/markdown files for every personal note
+   * - notes_summary.json (Array of notes and folders)
+   * - START_HERE_README.txt
    */
-  async shareBackupData() {
+  async createZipBackup({ type = 'complete', selection = {} } = {}) {
+    if (typeof window.JSZip === 'undefined') {
+      throw new Error('JSZip library is required to build the ZIP backup package.');
+    }
+
+    const data = await this.gatherBackupData(type, selection);
+    const dateStamp = DateUtils.formatForFilename();
+    const zip = new window.JSZip();
+
+    // 1. Master database JSON backup
+    const jsonStr = JSON.stringify(data, null, 2);
+    zip.file('backup.json', jsonStr);
+
+    // 2. Manifest file
+    const manifestStr = JSON.stringify(data.manifest, null, 2);
+    zip.file('manifest.json', manifestStr);
+
+    // 3. HTML Bookmarks
+    try {
+      const htmlContent = HtmlBookmarkParser.generate(data.links || [], data.folders || []);
+      zip.file('bookmarks.html', htmlContent);
+    } catch (e) {
+      console.warn('Could not generate HTML bookmarks for zip:', e);
+    }
+
+    // 4. CSV Spreadsheet
+    try {
+      const catMap = new Map((data.categories || []).map(c => [c.id, c.name]));
+      const folderMap = new Map((data.folders || []).map(f => [f.id, f.name]));
+      const enrichedLinks = (data.links || []).map(l => ({
+        ...l,
+        categoryName: l.categoryId ? (catMap.get(l.categoryId) || '') : '',
+        folderName: l.folderId ? (folderMap.get(l.folderId) || '') : ''
+      }));
+      const csvContent = CsvParser.generate(enrichedLinks);
+      zip.file('links.csv', csvContent);
+    } catch (e) {
+      console.warn('Could not generate CSV for zip:', e);
+    }
+
+    // 5. Notes Folder with individual note files
+    const notesFolder = zip.folder('notes');
+    const noteFolderMap = new Map((data.noteFolders || []).map(nf => [nf.id, nf.name]));
+
+    (data.notes || []).forEach(note => {
+      const safeTitle = (note.title || 'untitled').replace(/[^a-z0-9_-]/gi, '_').substring(0, 40);
+      const folderName = note.folderId ? (noteFolderMap.get(note.folderId) || 'Unfiled') : 'Root';
+      const createdStr = DateUtils.formatDateTime(note.createdAt);
+      const updatedStr = DateUtils.formatDateTime(note.updatedAt || note.createdAt);
+
+      const noteContent = `=====================================================
+${note.title}
+=====================================================
+Folder:  ${folderName}
+Pinned:  ${note.isPinned ? 'Yes' : 'No'}
+Tags:    ${Array.isArray(note.tags) ? note.tags.join(', ') : ''}
+Created: ${createdStr}
+Updated: ${updatedStr}
+-----------------------------------------------------
+
+${note.content || ''}
+`;
+      notesFolder.file(`${safeTitle}.txt`, noteContent);
+    });
+
+    // 6. Notes Summary JSON
+    notesFolder.file('notes_summary.json', JSON.stringify({
+      noteFolders: data.noteFolders || [],
+      notes: data.notes || []
+    }, null, 2));
+
+    // 7. Helpful README
+    const readme = `=====================================================
+ManageLinks Master Backup Package
+Application: 100% Offline Personal Link & Note Manager
+Developer: Devraj Chauhan
+Date: ${new Date().toLocaleString()}
+=====================================================
+
+CONTENTS OF THIS BACKUP ARCHIVE:
+1. backup.json         - Complete database backup. Restore this file via ManageLinks Restore Wizard.
+2. bookmarks.html      - Standard browser bookmark file. Import into Chrome, Edge, Firefox, Brave, Safari.
+3. links.csv           - Spreadsheet table of all your links and categories.
+4. notes/              - Directory containing all your individual personal notes as readable .txt files.
+5. manifest.json       - Backup metadata and verification checksum.
+
+HOW TO RESTORE:
+1. Open ManageLinks in any browser.
+2. Go to Database & Backup Center -> Restore Wizard.
+3. Select this ZIP file (or extract and select 'backup.json').
+4. That's it! All links, notes, folders, and categories will be restored.
+`;
+    zip.file('START_HERE_README.txt', readme);
+
+    // Generate ZIP blob
+    const zipBlob = await zip.generateAsync({
+      type: 'blob',
+      compression: 'DEFLATE',
+      compressionOptions: { level: 6 }
+    });
+
+    const finalFilename = `ManageLinks_Master_Backup_${dateStamp}.zip`;
+    FileUtils.downloadFile(zipBlob, finalFilename, 'application/zip');
+
+    const historyItem = {
+      id: generateId(),
+      name: finalFilename,
+      type,
+      format: 'zip',
+      isEncrypted: false,
+      recordCount: (data.links?.length || 0) + (data.categories?.length || 0) + (data.notes?.length || 0),
+      fileSize: FileUtils.formatSize(zipBlob.size),
+      sizeBytes: zipBlob.size,
+      status: 'ZIP Downloaded',
+      createdAt: DateUtils.now()
+    };
+
+    await db.put('backupHistory', historyItem);
+    return historyItem;
+  },
+
+  /**
+   * Prepares complete database backup payload for direct sharing
+   * Returns data object without triggering any download!
+   */
+  async prepareBackupForSharing() {
     const data = await this.gatherBackupData('complete');
     const dateStamp = DateUtils.formatForFilename();
     const finalFilename = `ManageLinks_Database_Backup_${dateStamp}.json`;
@@ -183,42 +343,23 @@ export const BackupManager = {
     const blobContent = new Blob([jsonStr], { type: 'application/json' });
     const backupFile = new File([blobContent], finalFilename, { type: 'application/json' });
 
-    const historyItem = {
-      id: generateId(),
-      name: finalFilename,
-      type: 'complete',
-      format: 'json',
-      isEncrypted: false,
-      recordCount: (data.links?.length || 0) + (data.categories?.length || 0) + (data.folders?.length || 0) + (data.notes?.length || 0),
-      fileSize: FileUtils.formatSize(blobContent.size),
-      sizeBytes: blobContent.size,
-      status: 'Shared',
-      createdAt: DateUtils.now()
+    return {
+      data,
+      dateStamp,
+      finalFilename,
+      jsonStr,
+      blobContent,
+      backupFile,
+      totalLinks: data.links?.length || 0,
+      totalNotes: data.notes?.length || 0,
+      totalCategories: data.categories?.length || 0,
+      totalFolders: data.folders?.length || 0,
+      totalSize: FileUtils.formatSize(blobContent.size)
     };
-
-    await db.put('backupHistory', historyItem);
-
-    if (navigator.canShare && navigator.canShare({ files: [backupFile] })) {
-      try {
-        await navigator.share({
-          files: [backupFile],
-          title: 'ManageLinks Database Backup',
-          text: `ManageLinks Database Backup (${dateStamp}) with ${data.links?.length || 0} links and ${data.notes?.length || 0} personal notes.`
-        });
-        return { success: true, method: 'native' };
-      } catch (err) {
-        if (err.name === 'AbortError') return { success: false, aborted: true };
-        console.warn('Native share error, falling back to download:', err);
-      }
-    }
-
-    // Fallback: download the file ready to attach/send
-    FileUtils.downloadFile(blobContent, finalFilename, 'application/json');
-    return { success: true, method: 'download' };
   },
 
   /**
-   * Execute backup download
+   * Execute custom backup download (JSON format)
    */
   async createBackup({ type = 'complete', format = 'json', password = null, selection = {} } = {}) {
     const data = await this.gatherBackupData(type, selection);
@@ -248,7 +389,7 @@ export const BackupManager = {
       type,
       format: 'json',
       isEncrypted: !!(password && password.trim()),
-      recordCount: (data.links?.length || 0) + (data.categories?.length || 0),
+      recordCount: (data.links?.length || 0) + (data.categories?.length || 0) + (data.notes?.length || 0),
       fileSize: FileUtils.formatSize(blobContent.size),
       sizeBytes: blobContent.size,
       status: 'Downloaded',
