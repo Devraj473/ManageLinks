@@ -82,14 +82,31 @@ export const SettingsManager = {
     return value;
   },
 
+  _mediaQueryListener: null,
+
   /**
    * Apply Theme to document HTML element
    */
   applyTheme(theme) {
     let effectiveTheme = theme;
     if (theme === 'system') {
-      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      effectiveTheme = prefersDark ? 'dark' : 'light';
+      const mediaQuery = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+      if (mediaQuery) {
+        effectiveTheme = mediaQuery.matches ? 'dark' : 'light';
+        if (!this._mediaQueryListener) {
+          this._mediaQueryListener = (e) => {
+            const currentTheme = Storage.get('theme') || 'system';
+            if (currentTheme === 'system') {
+              const newEff = e.matches ? 'dark' : 'light';
+              document.documentElement.setAttribute('data-bs-theme', newEff);
+              document.documentElement.setAttribute('data-theme', newEff);
+            }
+          };
+          if (mediaQuery.addEventListener) {
+            mediaQuery.addEventListener('change', this._mediaQueryListener);
+          }
+        }
+      }
     }
 
     document.documentElement.setAttribute('data-bs-theme', effectiveTheme);

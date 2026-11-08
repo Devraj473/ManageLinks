@@ -74,5 +74,13 @@ export const Validators = {
   isValidPin(pin) {
     if (!pin) return false;
     return /^\d{4,8}$/.test(pin.trim());
+  },
+
+  /**
+   * Validate integer within range
+   */
+  isValidNumber(val, min = 0, max = Infinity) {
+    const num = Number(val);
+    return !isNaN(num) && Number.isInteger(num) && num >= min && num <= max;
   }
 };

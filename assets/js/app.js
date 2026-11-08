@@ -25,6 +25,7 @@ import { SearchModal } from '../../components/search-modal.js';
 import { ConfirmationModal } from '../../components/confirmation-modal.js';
 import { PdfModal } from '../../components/pdf-modal.js';
 import { ShareModal } from '../../components/share-modal.js';
+import { NoteModal } from '../../components/note-modal.js';
 import { PwaInstaller } from './pwa-installer.js';
 import { AppDownloader } from '../../utils/app-downloader.js';
 
@@ -36,6 +37,7 @@ import { FavoritesPage } from '../../pages/favorites.js';
 import { CategoriesPage } from '../../pages/categories.js';
 import { FoldersPage } from '../../pages/folders.js';
 import { CollectionsPage } from '../../pages/collections.js';
+import { NotesPage } from '../../pages/notes.js';
 import { ReadingListPage } from '../../pages/reading-list.js';
 import { ArchivePage } from '../../pages/archive.js';
 import { TrashPage } from '../../pages/trash.js';
@@ -71,6 +73,7 @@ export const App = {
       ConfirmationModal.init();
       PdfModal.init();
       ShareModal.init();
+      NoteModal.init();
       PwaInstaller.init();
       Toast.init();
 
@@ -108,6 +111,10 @@ export const App = {
       window.addEventListener('ml-folder-deleted', handleDataChange);
       window.addEventListener('ml-collection-saved', handleDataChange);
       window.addEventListener('ml-collection-deleted', handleDataChange);
+      window.addEventListener('ml-notes-changed', () => {
+        SidebarComponent.updateBadges();
+        handleDataChange();
+      });
       window.addEventListener('ml-data-restored', handleDataChange);
 
       console.log('ManageLinks initialized successfully. Developed by Devraj Chauhan.');
@@ -318,6 +325,8 @@ export const App = {
       FoldersPage.render(param);
     } else if (route === 'collections' || route === 'collection') {
       CollectionsPage.render(param);
+    } else if (route === 'notes') {
+      NotesPage.render();
     } else if (route === 'dashboard') {
       DashboardPage.render();
     } else if (route === 'archive') {
@@ -342,6 +351,7 @@ export const App = {
       'folder': (id) => FoldersPage.render(id),
       'collections': () => CollectionsPage.render(),
       'collection': (id) => CollectionsPage.render(id),
+      'notes': () => NotesPage.render(),
       'reading-list': () => ReadingListPage.render(),
       'recently-visited': async () => {
         // Recently visited view

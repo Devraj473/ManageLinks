@@ -111,7 +111,8 @@ export const RestoreManager = {
         categories: [],
         folders: [],
         collections: [],
-        collectionLinks: []
+        collectionLinks: [],
+        notes: []
       };
     }
 
@@ -134,6 +135,7 @@ export const RestoreManager = {
       payload.folders = Array.isArray(payload.folders) ? payload.folders : [];
       payload.collections = Array.isArray(payload.collections) ? payload.collections : [];
       payload.collectionLinks = Array.isArray(payload.collectionLinks) ? payload.collectionLinks : [];
+      payload.notes = Array.isArray(payload.notes) ? payload.notes : [];
     }
 
     return payload;
@@ -325,6 +327,10 @@ export const RestoreManager = {
       if (sanitizedLinks.length > 0) {
         await db.putBulk('links', sanitizedLinks);
       }
+      if (Array.isArray(backupData.notes) && backupData.notes.length > 0) {
+        await db.clear('notes');
+        await db.putBulk('notes', backupData.notes);
+      }
 
       restoredLinksCount = sanitizedLinks.length;
     } else {
@@ -333,10 +339,12 @@ export const RestoreManager = {
       const existingCategories = await db.getAll('categories');
       const existingFolders = await db.getAll('folders');
       const existingCollections = await db.getAll('collections');
+      const existingNotes = await db.getAll('notes');
 
       const existingCatIds = new Set(existingCategories.map(c => c.id));
       const existingFolderIds = new Set(existingFolders.map(f => f.id));
       const existingColIds = new Set(existingCollections.map(c => c.id));
+      const existingNoteIds = new Set(existingNotes.map(n => n.id));
       const existingUrlMap = new Map();
       existingLinks.forEach(l => existingUrlMap.set(l.url, l));
       const existingLinkIdSet = new Set(existingLinks.map(l => l.id));
@@ -385,6 +393,14 @@ export const RestoreManager = {
       // Merge collectionLinks
       if (sanitizedCollectionLinks.length > 0) {
         await db.putBulk('collectionLinks', sanitizedCollectionLinks);
+      }
+
+      // Merge Notes
+      if (Array.isArray(backupData.notes) && backupData.notes.length > 0) {
+        const notesToPut = backupData.notes.filter(n => !existingNoteIds.has(n.id));
+        if (notesToPut.length > 0) {
+          await db.putBulk('notes', notesToPut);
+        }
       }
     }
 

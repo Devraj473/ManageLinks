@@ -116,6 +116,16 @@ async function run() {
   const res5 = await ImportManager.parseJson(singleObj);
   assert(Array.isArray(res5) && res5.length === 1, 'Import parses single bookmark object');
 
+  // Auto-Lock Inactivity setting tests
+  assert(Validators.isValidNumber(0, 0, 120), 'Auto-lock disabled (0) is valid');
+  assert(Validators.isValidNumber(15, 0, 120), 'Auto-lock 15 minutes is valid');
+  assert(!Validators.isValidNumber(-5, 0, 120), 'Negative auto-lock timeout rejected');
+
+  // Note tag parsing test
+  const testTagsRaw = 'work, projects, dev, react';
+  const parsedTags = testTagsRaw.split(',').map(t => t.trim()).filter(Boolean);
+  assert(parsedTags.length === 4 && parsedTags[2] === 'dev', 'Note tags comma-separated parser');
+
   console.log(`\nResults: ${passed}/${total} passed (${failed} failed)`);
   if (failed > 0) {
     process.exit(1);

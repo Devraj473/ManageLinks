@@ -108,18 +108,25 @@ export const Security = {
    * Setup inactivity auto-lock listener
    */
   initInactivityTracker(minutes = 15) {
-    this.inactivityMinutes = minutes;
+    this.inactivityMinutes = parseInt(minutes, 10) || 0;
+    if (this.inactivityTimer) {
+      clearInterval(this.inactivityTimer);
+      this.inactivityTimer = null;
+    }
     if (this.inactivityMinutes <= 0) return;
 
     const resetTimer = () => {
       this.updateActivity();
     };
 
-    window.addEventListener('mousemove', resetTimer, { passive: true });
-    window.addEventListener('keydown', resetTimer, { passive: true });
-    window.addEventListener('touchstart', resetTimer, { passive: true });
+    if (!this._listenersAttached) {
+      window.addEventListener('mousemove', resetTimer, { passive: true });
+      window.addEventListener('keydown', resetTimer, { passive: true });
+      window.addEventListener('touchstart', resetTimer, { passive: true });
+      this._listenersAttached = true;
+    }
 
-    if (this.inactivityTimer) clearInterval(this.inactivityTimer);
+    this.updateActivity();
 
     this.inactivityTimer = setInterval(async () => {
       const pinEnabled = await this.isPinEnabled();
@@ -132,7 +139,7 @@ export const Security = {
           this.lockSession();
         }
       }
-    }, 15000);
+    }, 10000);
   },
 
   updateActivity() {
@@ -149,6 +156,7 @@ export const Security = {
     await db.clear('collections');
     await db.clear('collectionLinks');
     await db.clear('tags');
+    await db.clear('notes');
     await db.clear('settings');
     await db.clear('deletedItems');
     await db.clear('backupHistory');

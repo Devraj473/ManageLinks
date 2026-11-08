@@ -5,7 +5,7 @@
  */
 
 export const DB_NAME = 'ManageLinksDB';
-export const DB_VERSION = 1;
+export const DB_VERSION = 2;
 
 export function generateId() {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -111,6 +111,15 @@ export class Database {
         if (!db.objectStoreNames.contains('backupHistory')) {
           const backupStore = db.createObjectStore('backupHistory', { keyPath: 'id' });
           backupStore.createIndex('createdAt', 'createdAt', { unique: false });
+        }
+
+        // 10. notes store (Personal Notes)
+        if (!db.objectStoreNames.contains('notes')) {
+          const noteStore = db.createObjectStore('notes', { keyPath: 'id' });
+          noteStore.createIndex('title', 'title', { unique: false });
+          noteStore.createIndex('isPinned', 'isPinned', { unique: false });
+          noteStore.createIndex('createdAt', 'createdAt', { unique: false });
+          noteStore.createIndex('updatedAt', 'updatedAt', { unique: false });
         }
       };
 

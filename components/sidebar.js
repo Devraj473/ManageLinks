@@ -55,6 +55,11 @@ export const SidebarComponent = {
           <span>Pinned Links</span>
           <span class="nav-badge" id="badge-pinned">0</span>
         </a>
+        <a href="#notes" class="nav-link-item" data-nav="notes">
+          ${Icons.get('file-text', { size: 18 })}
+          <span>Personal Notes</span>
+          <span class="nav-badge" id="badge-notes">0</span>
+        </a>
         <a href="#categories" class="nav-link-item" data-nav="categories">
           ${Icons.get('folder', { size: 18 })}
           <span>Categories</span>
@@ -96,10 +101,6 @@ export const SidebarComponent = {
           ${Icons.get('bar-chart-2', { size: 18 })}
           <span>Analytics</span>
         </a>
-        <a href="#data-management" class="nav-link-item" data-nav="data-management">
-          ${Icons.get('database', { size: 18 })}
-          <span>Backup & Data</span>
-        </a>
         <a href="#settings" class="nav-link-item" data-nav="settings">
           ${Icons.get('settings', { size: 18 })}
           <span>Settings</span>
@@ -107,16 +108,6 @@ export const SidebarComponent = {
         <a href="#about" class="nav-link-item" data-nav="about">
           ${Icons.get('info', { size: 18 })}
           <span>About ManageLinks</span>
-        </a>
-
-        <div class="sidebar-category-header">Offline & Portability</div>
-        <a href="javascript:void(0)" class="nav-link-item" id="sidebar-share-app-btn">
-          ${Icons.get('share-2', { size: 18, color: 'var(--ml-primary)' })}
-          <span>Share & Download App</span>
-        </a>
-        <a href="javascript:void(0)" class="nav-link-item btn-install-app" id="sidebar-install-pwa-btn">
-          ${Icons.get('smartphone', { size: 18, color: '#16a34a' })}
-          <span>Install App (PWA)</span>
         </a>
       </nav>
 
@@ -136,6 +127,7 @@ export const SidebarComponent = {
       const folders = await db.getAll('folders');
       const collections = await db.getAll('collections');
       const trash = await db.getAll('deletedItems');
+      const notes = await db.getAll('notes');
 
       let inbox = 0;
       let fav = 0;
@@ -162,6 +154,7 @@ export const SidebarComponent = {
       setBadge('badge-all-links', activeLinks);
       setBadge('badge-favorites', fav);
       setBadge('badge-pinned', pin);
+      setBadge('badge-notes', notes.length);
       setBadge('badge-categories', categories.length);
       setBadge('badge-folders', folders.length);
       setBadge('badge-collections', collections.length);

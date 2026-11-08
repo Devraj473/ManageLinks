@@ -52,6 +52,7 @@ export const BackupManager = {
     let folders = await db.getAll('folders');
     let collections = await db.getAll('collections');
     let collectionLinks = await db.getAll('collectionLinks');
+    let notes = await db.getAll('notes');
     let settings = await db.getAll('settings');
     let deletedItems = await db.getAll('deletedItems');
 
@@ -61,6 +62,7 @@ export const BackupManager = {
         folders = [];
         collections = [];
         collectionLinks = [];
+        notes = [];
         deletedItems = [];
         break;
 
@@ -68,6 +70,7 @@ export const BackupManager = {
         links = [];
         collections = [];
         collectionLinks = [];
+        notes = [];
         deletedItems = [];
         break;
 
@@ -79,6 +82,7 @@ export const BackupManager = {
         folders = folders.filter(f => favFolderIds.has(f.id));
         collections = [];
         collectionLinks = [];
+        notes = [];
         deletedItems = [];
         break;
 
@@ -89,6 +93,7 @@ export const BackupManager = {
           folders = [];
           collections = [];
           collectionLinks = [];
+          notes = [];
           deletedItems = [];
         }
         break;
@@ -100,6 +105,7 @@ export const BackupManager = {
           categories = [];
           collections = [];
           collectionLinks = [];
+          notes = [];
           deletedItems = [];
         }
         break;
@@ -113,6 +119,7 @@ export const BackupManager = {
           collectionLinks = cLinks;
           categories = [];
           folders = [];
+          notes = [];
           deletedItems = [];
         }
         break;
@@ -130,6 +137,7 @@ export const BackupManager = {
       folders,
       collections,
       collectionLinks,
+      notes,
       settings,
       deletedItems
     };
@@ -153,7 +161,7 @@ export const BackupManager = {
       type: 'complete',
       format: 'json',
       isEncrypted: false,
-      recordCount: (data.links?.length || 0) + (data.categories?.length || 0) + (data.folders?.length || 0),
+      recordCount: (data.links?.length || 0) + (data.categories?.length || 0) + (data.folders?.length || 0) + (data.notes?.length || 0),
       fileSize: FileUtils.formatSize(blobContent.size),
       sizeBytes: blobContent.size,
       status: 'Downloaded',
@@ -162,6 +170,51 @@ export const BackupManager = {
 
     await db.put('backupHistory', historyItem);
     return historyItem;
+  },
+
+  /**
+   * Directly share the complete database backup file via Web Share API
+   */
+  async shareBackupData() {
+    const data = await this.gatherBackupData('complete');
+    const dateStamp = DateUtils.formatForFilename();
+    const finalFilename = `ManageLinks_Database_Backup_${dateStamp}.json`;
+    const jsonStr = JSON.stringify(data, null, 2);
+    const blobContent = new Blob([jsonStr], { type: 'application/json' });
+    const backupFile = new File([blobContent], finalFilename, { type: 'application/json' });
+
+    const historyItem = {
+      id: generateId(),
+      name: finalFilename,
+      type: 'complete',
+      format: 'json',
+      isEncrypted: false,
+      recordCount: (data.links?.length || 0) + (data.categories?.length || 0) + (data.folders?.length || 0) + (data.notes?.length || 0),
+      fileSize: FileUtils.formatSize(blobContent.size),
+      sizeBytes: blobContent.size,
+      status: 'Shared',
+      createdAt: DateUtils.now()
+    };
+
+    await db.put('backupHistory', historyItem);
+
+    if (navigator.canShare && navigator.canShare({ files: [backupFile] })) {
+      try {
+        await navigator.share({
+          files: [backupFile],
+          title: 'ManageLinks Database Backup',
+          text: `ManageLinks Database Backup (${dateStamp}) with ${data.links?.length || 0} links and ${data.notes?.length || 0} personal notes.`
+        });
+        return { success: true, method: 'native' };
+      } catch (err) {
+        if (err.name === 'AbortError') return { success: false, aborted: true };
+        console.warn('Native share error, falling back to download:', err);
+      }
+    }
+
+    // Fallback: download the file ready to attach/send
+    FileUtils.downloadFile(blobContent, finalFilename, 'application/json');
+    return { success: true, method: 'download' };
   },
 
   /**

@@ -39,10 +39,11 @@ export const SettingsPage = {
               <div class="mb-3">
                 <label for="setting-theme" class="form-label fw-semibold">Color Theme</label>
                 <select class="form-select" id="setting-theme">
-                  <option value="system" ${settings.theme === 'system' ? 'selected' : ''}>System Default</option>
+                  <option value="system" ${settings.theme === 'system' ? 'selected' : ''}>System Default (Auto Manage Dark/Light)</option>
                   <option value="light" ${settings.theme === 'light' ? 'selected' : ''}>Light Theme</option>
                   <option value="dark" ${settings.theme === 'dark' ? 'selected' : ''}>Dark Theme</option>
                 </select>
+                <div class="form-text small">System Default automatically matches your computer or phone's operating system appearance.</div>
               </div>
 
               <!-- Default View Mode -->
@@ -112,66 +113,87 @@ export const SettingsPage = {
 
         <!-- Storage Management & Danger Zone -->
         <div class="col-lg-6">
+          <!-- Local Storage Overview -->
           <div class="card border shadow-sm mb-4">
             <div class="card-header bg-transparent py-3">
-              <h6 class="fw-bold mb-0">${Icons.get('database', { size: 16, className: 'me-1' })} Local Storage Management</h6>
+              <h6 class="fw-bold mb-0">${Icons.get('database', { size: 16, className: 'me-1' })} Local Storage Overview</h6>
             </div>
             <div class="card-body">
               <div class="mb-3">
                 <div class="d-flex justify-content-between small text-muted mb-1">
                   <span>IndexedDB Estimated Usage</span>
-                  <span>${FileUtils.formatSize(storageEst.usage)}</span>
+                  <span class="fw-bold">${FileUtils.formatSize(storageEst.usage)}</span>
                 </div>
                 <div class="progress" style="height: 8px;">
                   <div class="progress-bar bg-primary" role="progressbar" style="width: ${Math.min(storageEst.percentUsed, 100)}%;"></div>
                 </div>
-                <div class="text-muted mt-1 small">
-                  Quota: ${storageEst.quota ? FileUtils.formatSize(storageEst.quota) : 'Device Quota'}
+                <div class="text-muted mt-2 small">
+                  Device Storage Quota: ${storageEst.quota ? FileUtils.formatSize(storageEst.quota) : 'Unlimited Local Device Storage'}
                 </div>
               </div>
-
-              <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded border mb-3">
-                <div>
-                  <div class="fw-semibold small">Persistent Storage Permission</div>
-                  <div class="text-muted" style="font-size:0.75rem;">Status: ${storageEst.isPersisted ? 'Granted (Safe from eviction)' : 'Not persistent'}</div>
-                </div>
-                <button id="btn-request-persist" class="btn btn-sm btn-outline-primary" ${storageEst.isPersisted ? 'disabled' : ''}>
-                  ${storageEst.isPersisted ? 'Persisted' : 'Request Persistence'}
-                </button>
-              </div>
-
-              <div class="d-flex gap-2">
-                <a href="#data-management" class="btn btn-sm btn-outline-secondary w-100">Open Backup Center</a>
-              </div>
+              <p class="small text-secondary mb-0">
+                All your links, categories, folders, collections, notes, and preferences are stored 100% inside your browser's local IndexedDB sandbox. No external servers or cloud accounts.
+              </p>
             </div>
           </div>
 
-          <!-- Offline Portability & App Installation -->
+          <!-- Application & Data Hub Navigation -->
           <div class="card border shadow-sm mb-4">
             <div class="card-header bg-transparent py-3">
-              <h6 class="fw-bold mb-0">${Icons.get('monitor', { size: 16, className: 'me-1' })} Offline Installation & App (.exe)</h6>
+              <h6 class="fw-bold mb-0">${Icons.get('grid', { size: 16, className: 'me-1' })} Data & Application Hub</h6>
             </div>
             <div class="card-body">
               <p class="small text-secondary mb-3">
-                ManageLinks is 100% serverless. Download the standalone Windows installer (.exe) or install it as a PWA on this device.
+                Quick access to complete data backup, restoration, software sharing, installation, and application details.
               </p>
               <div class="d-flex flex-column gap-2">
-                <button type="button" id="settings-download-exe-btn" class="btn btn-primary btn-sm d-flex align-items-center justify-content-center gap-2 shadow-sm">
-                  ${Icons.get('download', { size: 16, color: '#fff' })}
-                  <span class="fw-bold">Download Windows App (.exe)</span>
+                <!-- Backup & Data -->
+                <a href="#data-management" class="btn btn-primary d-flex align-items-center justify-content-between py-2 px-3 text-decoration-none">
+                  <div class="d-flex align-items-center gap-2">
+                    ${Icons.get('database', { size: 18, color: '#fff' })}
+                    <div class="text-start">
+                      <div class="fw-bold fs-6 text-white">Database & Backup Center</div>
+                      <div class="small text-white-50" style="font-size: 0.72rem;">One-click backup, restore wizard, import & export</div>
+                    </div>
+                  </div>
+                  <span>&rarr;</span>
+                </a>
+
+                <!-- Share & Download Desktop App -->
+                <button type="button" id="settings-share-app-btn" class="btn btn-outline-primary d-flex align-items-center justify-content-between py-2 px-3 text-start">
+                  <div class="d-flex align-items-center gap-2">
+                    ${Icons.get('share-2', { size: 18 })}
+                    <div>
+                      <div class="fw-bold">Share & Download App (.exe)</div>
+                      <div class="text-muted small" style="font-size: 0.72rem;">Share standalone installer file with friends & devices</div>
+                    </div>
+                  </div>
+                  <span>&rarr;</span>
                 </button>
-                <button type="button" id="settings-install-pwa-btn" class="btn btn-outline-success btn-sm d-flex align-items-center justify-content-center gap-2">
-                  ${Icons.get('smartphone', { size: 16 })}
-                  <span>Install ManageLinks App (PWA)</span>
+
+                <!-- Install App -->
+                <button type="button" id="settings-install-pwa-btn" class="btn btn-outline-success d-flex align-items-center justify-content-between py-2 px-3 text-start">
+                  <div class="d-flex align-items-center gap-2">
+                    ${Icons.get('smartphone', { size: 18 })}
+                    <div>
+                      <div class="fw-bold">Install Application (PWA)</div>
+                      <div class="text-muted small" style="font-size: 0.72rem;">Install native Progressive Web App on desktop or mobile</div>
+                    </div>
+                  </div>
+                  <span>&rarr;</span>
                 </button>
-                <button type="button" id="settings-download-zip-btn" class="btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center gap-2">
-                  ${Icons.get('folder', { size: 16 })}
-                  <span>Download Portable Tool (.zip)</span>
-                </button>
-                <button type="button" id="settings-share-app-btn" class="btn btn-outline-primary btn-sm d-flex align-items-center justify-content-center gap-2">
-                  ${Icons.get('share-2', { size: 16 })}
-                  <span>Share App Installer (.exe)</span>
-                </button>
+
+                <!-- About & Policies -->
+                <a href="#about" class="btn btn-outline-secondary d-flex align-items-center justify-content-between py-2 px-3 text-decoration-none text-start">
+                  <div class="d-flex align-items-center gap-2">
+                    ${Icons.get('info', { size: 18 })}
+                    <div>
+                      <div class="fw-bold text-dark">About ManageLinks by Devraj Chauhan</div>
+                      <div class="text-muted small" style="font-size: 0.72rem;">Privacy policy, storage details, terms & developer contact</div>
+                    </div>
+                  </div>
+                  <span class="text-secondary">&rarr;</span>
+                </a>
               </div>
             </div>
           </div>
@@ -183,7 +205,7 @@ export const SettingsPage = {
             </div>
             <div class="card-body">
               <p class="text-secondary small mb-3">
-                Permanently purge all links, categories, folders, settings, and database tables from this device.
+                Permanently purge all links, categories, folders, personal notes, settings, and database tables from this device.
               </p>
               <button id="btn-wipe-database" class="btn btn-danger w-100">
                 Purge All Local Data & Reset App
@@ -230,6 +252,14 @@ export const SettingsPage = {
       Toast.success('Default sort order updated');
     });
 
+    // Auto-Lock on Inactivity change
+    document.getElementById('setting-autolock')?.addEventListener('change', async (e) => {
+      const minutes = parseInt(e.target.value, 10);
+      await SettingsManager.set('autoLockMinutes', minutes);
+      Security.initInactivityTracker(minutes);
+      Toast.success(minutes > 0 ? `Auto-lock set to ${minutes} minutes of inactivity` : 'Auto-lock disabled');
+    });
+
     // PIN toggle
     const pinToggle = document.getElementById('setting-pin-toggle');
     const pinSetupBox = document.getElementById('pin-setup-box');
@@ -254,17 +284,6 @@ export const SettingsPage = {
       await Security.setPin(pin);
       pinSetupBox.classList.add('d-none');
       Toast.success('Application PIN lock set successfully!');
-    });
-
-    // Request Persistence
-    document.getElementById('btn-request-persist')?.addEventListener('click', async () => {
-      const granted = await db.requestPersistence();
-      if (granted) {
-        Toast.success('Persistent storage granted by browser!');
-        await this.render();
-      } else {
-        Toast.warning('Persistent storage not granted by browser');
-      }
     });
 
     // Wipe Database
