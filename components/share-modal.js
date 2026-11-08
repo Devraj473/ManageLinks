@@ -179,13 +179,21 @@ export const ShareModal = {
   openForApp() {
     if (!this.bsModal) this.init();
 
+    // Pre-cache installer binaries in memory so transient user gesture is never lost
+    AppDownloader.prepareCache();
+
     const titleEl = document.getElementById('shareModalTitle');
     const subtitleEl = document.getElementById('shareModalSubtitle');
     const bodyEl = document.getElementById('shareModalBody');
     const nativeBtn = document.getElementById('btn-modal-native-share');
 
-    titleEl.textContent = 'Share & Download ManageLinks Application';
-    subtitleEl.textContent = 'Complete Standalone Application (.exe) • 100% Offline • Zero Dependencies';
+    titleEl.textContent = 'Share ManageLinks Application';
+    subtitleEl.textContent = 'Standalone .EXE Installer • 100% Offline • Zero Dependencies • By Devraj Chauhan';
+
+    const { baseUrl, exeUrl, zipUrl } = AppDownloader.getInstallerUrls();
+    const appTitle = 'ManageLinks by Devraj Chauhan';
+    const appSummary = 'ManageLinks is a 100% offline personal bookmark, link, and notes manager with categories, folders, tags, and complete local privacy. Zero cloud tracking, zero external servers, runs everywhere.';
+    const shareMessage = `🚀 *ManageLinks v1.0* - Offline Personal Bookmark & Notes Manager\nDeveloper: Devraj Chauhan\n\n${appSummary}\n\n📥 Direct Standalone Installer (.exe):\n${exeUrl}\n\n📦 Compressed Installer Bundle (.zip):\n${zipUrl}\n\nDouble-click ManageLinks-Setup.exe to install and run completely offline!`;
 
     bodyEl.innerHTML = `
       <!-- App Header Badge -->
@@ -196,77 +204,120 @@ export const ShareModal = {
         </div>
         <div class="small text-muted mb-2">Developed by <strong>Devraj Chauhan</strong></div>
         <p class="small text-secondary mb-0">
-          Because ManageLinks runs 100% locally on your computer without a web server, sharing means sending the <strong>actual installable software file</strong> (<code>ManageLinks-Setup.exe</code>) so any recipient can install and use it immediately.
+          Share the actual software with anyone directly. Recipients do not need any web server, hosting, or internet connection to install and run ManageLinks.
         </p>
       </div>
 
-      <!-- Windows Desktop Application Installer (.exe) - Featured Primary Action Card -->
+      <!-- Option 1: Native System Share Sheet (Nearby Share, Bluetooth, Wi-Fi Direct, Apps) -->
       <div class="card border-primary shadow-sm mb-3" style="border-width: 1.5px; background: rgba(37, 99, 235, 0.04);">
         <div class="card-body p-3">
-          <div class="d-flex align-items-center gap-2 mb-2">
-            <span class="text-primary">${Icons.get('monitor', { size: 22 })}</span>
-            <span class="fw-bold text-dark fs-6">ManageLinks-Setup.exe (Windows Installer)</span>
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <div class="d-flex align-items-center gap-2">
+              <span class="text-primary">${Icons.get('share-2', { size: 20 })}</span>
+              <span class="fw-bold text-dark fs-6">Direct System Share (No Download)</span>
+            </div>
+            <span class="badge bg-primary text-white">Direct Transfer</span>
           </div>
           <p class="small text-secondary mb-3">
-            Single-file executable application. Double-click to automatically install ManageLinks on desktop & start menu. Runs offline with zero servers, zero database setup, and zero dependencies.
+            Directly invoke Windows / System Share Sheet to send the application via Windows Nearby Share, Bluetooth, Wi-Fi Direct, or connected apps without downloading to disk first.
           </p>
-          <div class="row g-2">
-            <div class="col-sm-6">
-              <button type="button" id="btn-share-installer-exe" class="btn btn-primary w-100 py-2 d-flex align-items-center justify-content-center gap-2 shadow-sm">
-                ${Icons.get('share-2', { size: 18, color: '#fff' })}
-                <span class="fw-bold">Directly Share .EXE File</span>
-              </button>
+          <button type="button" id="btn-share-installer-native" class="btn btn-primary w-100 py-2 d-flex align-items-center justify-content-center gap-2 shadow-sm">
+            ${Icons.get('share-2', { size: 18, color: '#fff' })}
+            <span class="fw-bold">Open System Share Sheet</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Option 2: Direct 1-Click Platform Sharing -->
+      <div class="card border shadow-sm mb-3">
+        <div class="card-body p-3">
+          <label class="form-label fw-bold text-dark small text-uppercase mb-2 d-flex align-items-center gap-1">
+            ${Icons.get('send', { size: 14 })} <span>Share Application via Messaging</span>
+          </label>
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(shareMessage)}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-success w-100 d-flex align-items-center justify-content-center gap-2 py-2" style="font-size: 0.88rem;">
+                <span>WhatsApp</span>
+              </a>
             </div>
-            <div class="col-sm-6">
-              <button type="button" id="btn-download-installer-exe" class="btn btn-success w-100 py-2 d-flex align-items-center justify-content-center gap-2 shadow-sm">
-                ${Icons.get('download', { size: 18, color: '#fff' })}
-                <span class="fw-bold">Download Installer (.exe)</span>
-              </button>
+            <div class="col-6">
+              <a href="https://t.me/share/url?url=${encodeURIComponent(exeUrl)}&text=${encodeURIComponent(appTitle + ' - ' + appSummary)}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-info w-100 d-flex align-items-center justify-content-center gap-2 py-2" style="font-size: 0.88rem;">
+                <span>Telegram</span>
+              </a>
             </div>
+            <div class="col-6">
+              <a href="mailto:?subject=${encodeURIComponent('ManageLinks - Standalone Offline Link Manager by Devraj Chauhan')}&body=${encodeURIComponent(shareMessage.replace(/\*/g, ''))}" class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2 py-2" style="font-size: 0.88rem;">
+                <span>Email App</span>
+              </a>
+            </div>
+            <div class="col-6">
+              <a href="https://twitter.com/intent/tweet?url=${encodeURIComponent(exeUrl)}&text=${encodeURIComponent('Check out ManageLinks: 100% Offline Personal Link & Bookmark Manager by Devraj Chauhan')}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-dark w-100 d-flex align-items-center justify-content-center gap-2 py-2" style="font-size: 0.88rem;">
+                <span>X (Twitter)</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Direct Copy .EXE Link Input -->
+          <label class="form-label fw-semibold text-muted small text-uppercase mb-1">Direct Installer Link (.exe)</label>
+          <div class="input-group mb-2">
+            <input type="text" class="form-control form-control-sm" id="shareAppExeUrlInput" value="${Security.escapeHtml(exeUrl)}" readonly />
+            <button class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1" type="button" id="btn-copy-app-exe-url">
+              ${Icons.get('copy', { size: 14 })} <span>Copy Link</span>
+            </button>
           </div>
         </div>
       </div>
 
-      <!-- Alternative Portable Package & PWA Options -->
-      <div class="row g-2 mb-3">
-        <div class="col-sm-6">
-          <button type="button" id="btn-share-download-zip" class="btn btn-outline-secondary w-100 py-2 d-flex flex-column align-items-center text-center">
-            <span class="mb-1">${Icons.get('folder', { size: 18 })}</span>
-            <span class="fw-bold" style="font-size: 0.85rem;">Portable ZIP Bundle</span>
-            <span class="text-muted" style="font-size: 0.72rem;">USB / Non-Windows offline bundle</span>
-          </button>
+      <!-- Option 3: Local Offline Downloads (Clearly Separated) -->
+      <div class="card border border-secondary-subtle bg-light shadow-sm mb-2">
+        <div class="card-body p-3">
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="text-secondary">${Icons.get('download', { size: 16 })}</span>
+            <span class="fw-bold text-secondary small text-uppercase">Save Offline File to Disk or USB (Optional)</span>
+          </div>
+          <p class="small text-muted mb-2" style="font-size: 0.78rem;">
+            Only use these buttons if you specifically want to download the software onto this computer or copy it to a USB flash drive.
+          </p>
+          <div class="row g-2">
+            <div class="col-sm-4">
+              <button type="button" id="btn-download-installer-exe" class="btn btn-outline-primary btn-sm w-100 py-2 d-flex align-items-center justify-content-center gap-1">
+                ${Icons.get('download', { size: 14 })}
+                <span>Download .EXE</span>
+              </button>
+            </div>
+            <div class="col-sm-4">
+              <button type="button" id="btn-share-download-zip" class="btn btn-outline-secondary btn-sm w-100 py-2 d-flex align-items-center justify-content-center gap-1">
+                ${Icons.get('folder', { size: 14 })}
+                <span>Portable ZIP</span>
+              </button>
+            </div>
+            <div class="col-sm-4">
+              <button type="button" id="btn-share-install-pwa" class="btn btn-outline-success btn-sm w-100 py-2 d-flex align-items-center justify-content-center gap-1">
+                ${Icons.get('smartphone', { size: 14 })}
+                <span>Install PWA</span>
+              </button>
+            </div>
+          </div>
         </div>
-        <div class="col-sm-6">
-          <button type="button" id="btn-share-install-pwa" class="btn btn-outline-success w-100 py-2 d-flex flex-column align-items-center text-center">
-            <span class="mb-1">${Icons.get('smartphone', { size: 18 })}</span>
-            <span class="fw-bold" style="font-size: 0.85rem;">Install as Web App</span>
-            <span class="text-muted" style="font-size: 0.72rem;">Install PWA on this device</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Step-by-Step Instructions Box -->
-      <div class="p-3 bg-light rounded border mb-2">
-        <div class="fw-bold small text-dark mb-1">How to send to friends or other devices:</div>
-        <ol class="small text-secondary ps-3 mb-0">
-          <li class="mb-1">Click <strong>Directly Share .EXE File</strong> to share via WhatsApp, Telegram, Email, Bluetooth, or Nearby Share.</li>
-          <li class="mb-1">Alternatively, click <strong>Download Installer (.exe)</strong> and transfer the file via USB drive or email attachment.</li>
-          <li>The recipient double-clicks <code>ManageLinks-Setup.exe</code> to install and run the application completely offline!</li>
-        </ol>
       </div>
     `;
 
-    // Share .EXE installer
-    document.getElementById('btn-share-installer-exe')?.addEventListener('click', () => {
-      AppDownloader.shareInstallerExe();
+    // Direct native share button (no download)
+    document.getElementById('btn-share-installer-native')?.addEventListener('click', () => {
+      AppDownloader.shareDirectly();
     });
 
-    // Download .EXE installer
+    // Copy .exe URL button
+    document.getElementById('btn-copy-app-exe-url')?.addEventListener('click', () => {
+      AppDownloader.copyInstallerUrl();
+    });
+
+    // Explicit download of .EXE
     document.getElementById('btn-download-installer-exe')?.addEventListener('click', () => {
       AppDownloader.downloadInstallerExe();
     });
 
-    // Portable ZIP download
+    // Explicit download of ZIP
     document.getElementById('btn-share-download-zip')?.addEventListener('click', () => {
       AppDownloader.downloadAppZip();
     });
@@ -276,12 +327,13 @@ export const ShareModal = {
       PwaInstaller.promptInstall();
     });
 
-    // Native share button
+    // Bottom modal footer native share button
     nativeBtn.classList.remove('d-none');
     nativeBtn.classList.add('d-inline-flex');
-    nativeBtn.textContent = 'Share .EXE File';
+    nativeBtn.innerHTML = `${Icons.get('share-2', { size: 14, color: '#fff' })} <span>System Share</span>`;
+    nativeBtn.className = 'btn btn-primary btn-sm d-inline-flex align-items-center gap-1 shadow-sm';
     nativeBtn.onclick = () => {
-      AppDownloader.shareInstallerExe();
+      AppDownloader.shareDirectly();
     };
 
     this.bsModal.show();

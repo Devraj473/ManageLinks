@@ -4,7 +4,7 @@
  * Caches application shell assets while leaving user IndexedDB data intact
  */
 
-const CACHE_NAME = 'managelinks-shell-v1.3.0';
+const CACHE_NAME = 'managelinks-shell-v1.4.0';
 
 const PRECACHE_ASSETS = [
   './',
