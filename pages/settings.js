@@ -159,13 +159,13 @@ export const SettingsPage = {
                   <span>&rarr;</span>
                 </a>
 
-                <!-- Share & Download Desktop App -->
+                <!-- Share Live App -->
                 <button type="button" id="settings-share-app-btn" class="btn btn-outline-primary d-flex align-items-center justify-content-between py-2 px-3 text-start">
                   <div class="d-flex align-items-center gap-2">
                     ${Icons.get('share-2', { size: 18 })}
                     <div>
-                      <div class="fw-bold">Share & Download App (.exe)</div>
-                      <div class="text-muted small" style="font-size: 0.72rem;">Share standalone installer file with friends & devices</div>
+                      <div class="fw-bold">Share Live Application</div>
+                      <div class="text-muted small" style="font-size: 0.72rem;">Share live link via WhatsApp, Telegram, Email, or System Share</div>
                     </div>
                   </div>
                   <span>&rarr;</span>

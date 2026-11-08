@@ -77,9 +77,6 @@ export const App = {
       PwaInstaller.init();
       Toast.init();
 
-      // Gently pre-cache installer binaries in background for instant direct sharing (retains user gesture token)
-      setTimeout(() => AppDownloader.prepareCache(), 1500);
-
       // 6. Check PIN Lock
       const pinEnabled = await Security.isPinEnabled();
       if (pinEnabled && !Security.isSessionUnlocked()) {

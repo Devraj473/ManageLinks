@@ -287,7 +287,7 @@ export const AboutPage = {
                 <div class="col-md-6">
                   <div class="text-muted small">Application Name</div>
                   <div class="fw-bold fs-6 text-dark">ManageLinks</div>
-                  <div class="text-secondary small">Official Full Title: ManageLinks by Devraj Chauhan</div>
+                  <div class="text-secondary small">Official Title: ManageLinks by Devraj Chauhan</div>
                 </div>
                 <div class="col-md-6">
                   <div class="text-muted small">Software Version</div>
@@ -301,11 +301,27 @@ export const AboutPage = {
                 <div class="col-md-6">
                   <div class="text-muted small">Developer Contact Email</div>
                   <div class="fw-bold fs-6">
-                    <a href="mailto:devrajchauhan.work@gmail.com" class="text-primary text-decoration-none">
-                      devrajchauhan.work@gmail.com
+                    <a href="mailto:chauhandevraj473@gmail.com" class="text-primary text-decoration-none">
+                      chauhandevraj473@gmail.com
                     </a>
                   </div>
-                  <div class="text-muted small">Direct inquiries, feedback, and questions</div>
+                  <div class="text-muted small">Personal email for inquiries, suggestions, and feedback</div>
+                </div>
+                <div class="col-md-6">
+                  <div class="text-muted small">GitHub Profile</div>
+                  <div class="fw-bold fs-6">
+                    <a href="https://github.com/Devraj473" target="_blank" rel="noopener noreferrer" class="text-primary text-decoration-none">
+                      github.com/Devraj473
+                    </a>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="text-muted small">Open-Source Repository</div>
+                  <div class="fw-bold fs-6">
+                    <a href="https://github.com/Devraj473/ManageLinks" target="_blank" rel="noopener noreferrer" class="text-primary text-decoration-none">
+                      github.com/Devraj473/ManageLinks
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
