@@ -37,6 +37,12 @@ export const DataManagementPage = {
           </h2>
           <p class="text-secondary mb-0">Complete data control: One-click backup, direct sharing, restore wizard, and open imports/exports.</p>
         </div>
+        <div>
+          <a href="#my-data" class="btn btn-outline-primary d-flex align-items-center gap-2">
+            ${Icons.get('hard-drive', { size: 16 })}
+            <span>View My Data & Storage</span>
+          </a>
+        </div>
       </div>
 
       <!-- ========================================================= -->

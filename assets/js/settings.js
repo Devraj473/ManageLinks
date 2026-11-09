@@ -19,6 +19,8 @@ export const DEFAULT_SETTINGS = {
   backupReminderFreq: 'weekly', // 'never', 'weekly', 'monthly'
   autoLockMinutes: 15, // 0 for disabled
   dateFormat: 'medium', // 'short', 'medium', 'long'
+  userEmail: 'chauhandevraj473@gmail.com', // Active owner email
+  userName: 'Devraj Chauhan',
   firstLaunchCompleted: false
 };
 

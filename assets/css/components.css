@@ -533,3 +533,10 @@
   z-index: 10;
   border-top: 1px solid var(--ml-border);
 }
+
+/* My Data Hub Styles */
+@media (min-width: 768px) {
+  .border-start-md {
+    border-left: 1px solid var(--ml-card-border, #e2e8f0) !important;
+  }
+}

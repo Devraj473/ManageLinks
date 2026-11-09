@@ -4,7 +4,7 @@
  * Caches application shell assets while leaving user IndexedDB data intact
  */
 
-const CACHE_NAME = 'managelinks-shell-v2.0.0';
+const CACHE_NAME = 'managelinks-shell-v2.1.0';
 
 const PRECACHE_ASSETS = [
   './',
@@ -67,6 +67,7 @@ const PRECACHE_ASSETS = [
   './pages/trash.js',
   './pages/analytics.js',
   './pages/data-management.js',
+  './pages/my-data.js',
   './pages/settings.js',
   './pages/about.js',
   './utils/validators.js',

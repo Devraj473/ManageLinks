@@ -52,6 +52,14 @@ No user accounts, no login servers, no Firebase/Supabase, and no advertising tra
 - **Note Sharing:** Share notes directly to WhatsApp, Telegram, Email, or System Share Sheet without saving to disk first.
 - **Clickable PDF Generation:** Generate print-ready vector PDFs for individual notes or an entire compiled notes catalog with 100% clickable links.
 
+### 🗄️ My Data & Storage Hub
+- **Owner Account & Email ID:** Set and view your personal email profile for identifying local vaults and backup credits.
+- **Browser & Sandbox Inspector:** See exactly which browser (Chrome, Edge, Firefox, Safari) and OS platform hold your data.
+- **Detailed Store Breakdown:** Real-time item counts and byte footprint for Links, Notes, Categories, Folders, Collections, and Trash.
+- **Storage Quota & Progress:** Live IndexedDB and CacheStorage usage vs. device quota with visual capacity bars.
+- **Storage Diagnostics:** 1-click diagnostic check to verify IndexedDB read/write latency, check URL health, and confirm zero corrupt records.
+- **High-Priority Persistence:** 1-click request to grant browser persistent storage protection against automatic eviction.
+
 ### 💾 Backup, Restore & Cross-Device Portability
 - **Master ZIP Backup Archive (`.zip`):** One-click package containing full database JSON, browser-standard `bookmarks.html`, spreadsheet `links.csv`, and individual readable `.txt` files for every note in a `notes/` directory.
 - **Instant JSON Backups:** Clean JSON exports of your complete database or selective scopes (Links Only, Notes Only, Categories Only).

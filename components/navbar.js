@@ -44,6 +44,10 @@ export const NavbarComponent = {
           ${Icons.get('sun', { size: 18, className: 'theme-icon-sun' })}
         </button>
 
+        <a href="#my-data" class="btn-ml-icon text-primary" title="My Data & Storage Profile">
+          ${Icons.get('hard-drive', { size: 18, color: 'var(--ml-primary)' })}
+        </a>
+
         <a href="#data-management" class="btn-ml-icon" title="Backup Center">
           ${Icons.get('database', { size: 18 })}
         </a>

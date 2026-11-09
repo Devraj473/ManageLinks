@@ -147,6 +147,18 @@ export const SettingsPage = {
                 Quick access to complete data backup, restoration, software sharing, installation, and application details.
               </p>
               <div class="d-flex flex-column gap-2">
+                <!-- My Data & Storage Hub -->
+                <a href="#my-data" class="btn btn-outline-primary d-flex align-items-center justify-content-between py-2 px-3 text-decoration-none">
+                  <div class="d-flex align-items-center gap-2">
+                    ${Icons.get('hard-drive', { size: 18, color: 'var(--ml-primary)' })}
+                    <div class="text-start">
+                      <div class="fw-bold fs-6 text-dark">My Data & Storage Profile</div>
+                      <div class="text-muted small" style="font-size: 0.72rem;">View linked email, browser storage location, quota & item details</div>
+                    </div>
+                  </div>
+                  <span class="text-primary">&rarr;</span>
+                </a>
+
                 <!-- Backup & Data -->
                 <a href="#data-management" class="btn btn-primary d-flex align-items-center justify-content-between py-2 px-3 text-decoration-none">
                   <div class="d-flex align-items-center gap-2">

@@ -96,7 +96,11 @@ export const SidebarComponent = {
           <span class="nav-badge" id="badge-trash">0</span>
         </a>
 
-        <div class="sidebar-category-header">System</div>
+        <div class="sidebar-category-header">System & Storage</div>
+        <a href="#my-data" class="nav-link-item" data-nav="my-data">
+          ${Icons.get('hard-drive', { size: 18 })}
+          <span>My Data & Storage</span>
+        </a>
         <a href="#analytics" class="nav-link-item" data-nav="analytics">
           ${Icons.get('bar-chart-2', { size: 18 })}
           <span>Analytics</span>

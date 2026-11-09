@@ -48,6 +48,13 @@ async function run() {
   assert(!Validators.isValidPin('12a4'), 'Alpha PIN rejected');
   assert(!Validators.isValidPin('123'), 'Short PIN (<4 digits) rejected');
 
+  // Email validation tests
+  assert(Validators.isValidEmail('chauhandevraj473@gmail.com'), 'Valid personal email accepted');
+  assert(Validators.isValidEmail('user.name+tag@sub.domain.co'), 'Complex valid email accepted');
+  assert(!Validators.isValidEmail('invalid-email'), 'Missing @ email rejected');
+  assert(!Validators.isValidEmail('user@domain'), 'Missing top-level domain rejected');
+  assert(!Validators.isValidEmail(''), 'Empty email rejected');
+
   // URL normalization & duplicate detection
   const norm1 = UrlUtils.normalizeUrl('https://example.com/');
   const norm2 = UrlUtils.normalizeUrl('https://example.com');

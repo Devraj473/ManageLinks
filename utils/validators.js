@@ -77,6 +77,14 @@ export const Validators = {
   },
 
   /**
+   * Validate email address format
+   */
+  isValidEmail(email) {
+    if (!email || typeof email !== 'string') return false;
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  },
+
+  /**
    * Validate integer within range
    */
   isValidNumber(val, min = 0, max = Infinity) {

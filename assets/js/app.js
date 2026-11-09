@@ -43,6 +43,7 @@ import { ArchivePage } from '../../pages/archive.js';
 import { TrashPage } from '../../pages/trash.js';
 import { AnalyticsPage } from '../../pages/analytics.js';
 import { DataManagementPage } from '../../pages/data-management.js';
+import { MyDataPage } from '../../pages/my-data.js';
 import { SettingsPage } from '../../pages/settings.js';
 import { AboutPage } from '../../pages/about.js';
 
@@ -333,6 +334,8 @@ export const App = {
       ArchivePage.render?.();
     } else if (route === 'trash') {
       TrashPage.render?.();
+    } else if (route === 'my-data') {
+      MyDataPage.render();
     } else if (this.router) {
       this.router.refresh();
     }
@@ -392,6 +395,7 @@ export const App = {
       'archive': () => ArchivePage.render(),
       'trash': () => TrashPage.render(),
       'analytics': () => AnalyticsPage.render(),
+      'my-data': () => MyDataPage.render(),
       'data-management': (subTab) => DataManagementPage.render(subTab),
       'settings': () => SettingsPage.render(),
       'about': () => AboutPage.render()
