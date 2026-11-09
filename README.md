@@ -8,13 +8,15 @@
 
 An offline-first, privacy-guaranteed Progressive Web Application (PWA) for managing website links, personal notes, Google Drive-style folders, and bookmarks with zero cloud databases, zero servers, and zero telemetry.
 
+[![GitHub Repository](https://img.shields.io/badge/GitHub_Repository-Devraj473%2FManageLinks-181717?style=for-the-badge&logo=github)](https://github.com/Devraj473/ManageLinks)
 [![Live Demo](https://img.shields.io/badge/Live_App-GitHub_Pages-2563eb?style=for-the-badge&logo=github)](https://devraj473.github.io/ManageLinks/)
 [![PWA Ready](https://img.shields.io/badge/PWA-100%25_Installable-16a34a?style=for-the-badge&logo=pwa)](https://devraj473.github.io/ManageLinks/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
 [![Zero Cloud](https://img.shields.io/badge/Privacy-100%25_Offline_Local-0ea5e9?style=for-the-badge)](LICENSE)
 
+**Official GitHub Repository:** [https://github.com/Devraj473/ManageLinks](https://github.com/Devraj473/ManageLinks)  
 **Live Web Application:** [https://devraj473.github.io/ManageLinks/](https://devraj473.github.io/ManageLinks/)  
-**Developer:** [Devraj Chauhan](https://github.com/Devraj473)  
+**Developer Profile:** [Devraj Chauhan](https://github.com/Devraj473)  
 **Contact Email:** [chauhandevraj473@gmail.com](mailto:chauhandevraj473@gmail.com)  
 **Version:** 1.0.0 (Production Release)
 
@@ -81,6 +83,32 @@ ManageLinks is an official **Progressive Web App (PWA)**. You can install it on 
 2. Tap the **Share** button (box with an arrow pointing up at the bottom).
 3. Scroll down and tap **"Add to Home Screen"**.
 4. Tap **Add**. ManageLinks is now accessible from your home screen like any native iOS app!
+
+---
+
+## 🌐 Live Deployment on GitHub Profile
+
+ManageLinks is deployed directly from the official GitHub account **Devraj473**:
+- **Official GitHub Repository:** [https://github.com/Devraj473/ManageLinks](https://github.com/Devraj473/ManageLinks)
+- **Live Web Application (GitHub Pages):** [https://devraj473.github.io/ManageLinks/](https://devraj473.github.io/ManageLinks/)
+
+> [!NOTE]
+> On GitHub, any website hosted from your profile `https://github.com/Devraj473/` is automatically given the official web address `https://devraj473.github.io/ManageLinks/`. Both the repository and the live address are part of your exact same GitHub account.
+
+### How to Make Live in 1 Click:
+1. Open **[https://github.com/new](https://github.com/new)** in your browser (signed in as **Devraj473**).
+2. Enter Repository name: **`ManageLinks`** (Set to **Public**).
+3. Do **NOT** check "Add a README" or license (all files are already generated and committed locally).
+4. Click **Create repository**.
+5. Push your local files:
+   ```bash
+   git push -u origin main
+   ```
+6. In your GitHub repository:
+   - Click **Settings** &rarr; **Pages** (on the left menu).
+   - Under **Build and deployment > Source**, select **Deploy from a branch**.
+   - Under **Branch**, select **`main`** and **`/ (root)`**, then click **Save**.
+7. Your app is now **100% LIVE**! Anyone can open `https://devraj473.github.io/ManageLinks/` on any mobile phone or computer to use and install the tool with one click.
 
 ---
 
