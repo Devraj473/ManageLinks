@@ -201,7 +201,7 @@ export const ShareModal = {
           <span class="fw-bold fs-6 text-primary">ManageLinks v1.0</span>
           <span class="badge bg-success-subtle text-success border border-success-subtle">PWA Install Ready</span>
         </div>
-        <div class="small text-muted mb-2">Developed by <strong>Devraj Chauhan</strong> (${Security.escapeHtml('chauhandevraj473@gmail.com')})</div>
+        <div class="small text-muted mb-2">Developed by <strong>Devraj Chauhan</strong> (${Security.escapeHtml('dc4682786@gmail.com')})</div>
         <p class="small text-secondary mb-0">
           ManageLinks is a live Progressive Web App. Anyone can open the link and install it directly on their desktop, laptop, or phone without app stores or servers!
         </p>

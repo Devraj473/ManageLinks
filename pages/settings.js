@@ -209,21 +209,6 @@ export const SettingsPage = {
               </div>
             </div>
           </div>
-
-          <!-- Danger Zone -->
-          <div class="card border border-danger-subtle shadow-sm">
-            <div class="card-header bg-danger-subtle text-danger py-3">
-              <h6 class="fw-bold mb-0">${Icons.get('alert-triangle', { size: 16, className: 'me-1' })} Danger Zone</h6>
-            </div>
-            <div class="card-body">
-              <p class="text-secondary small mb-3">
-                Permanently purge all links, categories, folders, personal notes, settings, and database tables from this device.
-              </p>
-              <button id="btn-wipe-database" class="btn btn-danger w-100">
-                Purge All Local Data & Reset App
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     `;
@@ -296,21 +281,6 @@ export const SettingsPage = {
       await Security.setPin(pin);
       pinSetupBox.classList.add('d-none');
       Toast.success('Application PIN lock set successfully!');
-    });
-
-    // Wipe Database
-    document.getElementById('btn-wipe-database')?.addEventListener('click', async () => {
-      const ok = await ConfirmationModal.ask({
-        title: 'PERMANENT DATA WIPE',
-        message: 'This will DELETE ALL saved bookmarks, categories, and settings from your device. Are you absolutely certain?',
-        confirmText: 'Yes, Purge Everything',
-        btnClass: 'btn-danger'
-      });
-      if (ok) {
-        await Security.wipeAllData();
-        Toast.error('All local data wiped');
-        setTimeout(() => window.location.reload(), 1000);
-      }
     });
   }
 };

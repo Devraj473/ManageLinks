@@ -49,7 +49,7 @@ async function run() {
   assert(!Validators.isValidPin('123'), 'Short PIN (<4 digits) rejected');
 
   // Email validation tests
-  assert(Validators.isValidEmail('chauhandevraj473@gmail.com'), 'Valid personal email accepted');
+  assert(Validators.isValidEmail('dc4682786@gmail.com'), 'Valid personal email accepted');
   assert(Validators.isValidEmail('user.name+tag@sub.domain.co'), 'Complex valid email accepted');
   assert(!Validators.isValidEmail('invalid-email'), 'Missing @ email rejected');
   assert(!Validators.isValidEmail('user@domain'), 'Missing top-level domain rejected');

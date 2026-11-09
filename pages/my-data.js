@@ -1,16 +1,16 @@
 /**
  * ManageLinks - My Data & Storage Hub Page
  * Developer: Devraj Chauhan
- * Inspect browser profile, owner email, storage usage, item counts, and diagnostic health
+ * Inspect browser profile, storage usage, item counts, diagnostics, and Danger Zone data wipe
  */
 
 import { Icons } from '../assets/js/icons.js';
 import { db } from '../assets/js/database.js';
-import { SettingsManager } from '../assets/js/settings.js';
 import { FileUtils } from '../utils/file-utils.js';
 import { Toast } from '../assets/js/notifications.js';
 import { Security } from '../assets/js/security.js';
 import { BackupManager } from '../assets/js/backup.js';
+import { ConfirmationModal } from '../components/confirmation-modal.js';
 
 export const MyDataPage = {
   async render() {
@@ -38,18 +38,13 @@ export const MyDataPage = {
   },
 
   async collectDataProfile() {
-    // 1. Settings & User Info
-    const settings = await SettingsManager.getAll();
-    const userEmail = settings.userEmail || 'chauhandevraj473@gmail.com';
-    const userName = settings.userName || 'Devraj Chauhan';
-
-    // 2. Browser & Device Environment
+    // 1. Browser & Device Environment
     const env = this.detectEnvironment();
 
-    // 3. Storage Estimates
+    // 2. Storage Estimates
     const storageEst = await db.getStorageEstimate();
 
-    // 4. Detailed Store Counts and Byte Estimations
+    // 3. Detailed Store Counts and Byte Estimations
     const stores = [
       { id: 'links', label: 'Website Bookmarks & Links', icon: 'link' },
       { id: 'notes', label: 'Personal Notes', icon: 'file-text' },
@@ -114,8 +109,6 @@ export const MyDataPage = {
     });
 
     return {
-      userEmail,
-      userName,
       env,
       storageEst,
       storeStats,
@@ -176,7 +169,7 @@ export const MyDataPage = {
   },
 
   template(data) {
-    const { userEmail, userName, env, storageEst, storeStats, totalItems, formattedJsonBytes, linkSubCounts, noteCount, totalNoteWords } = data;
+    const { env, storageEst, storeStats, totalItems, formattedJsonBytes, linkSubCounts, noteCount, totalNoteWords } = data;
 
     const percentNum = parseFloat(storageEst.percentUsed) || 0;
     const progressColor = percentNum > 85 ? 'bg-danger' : (percentNum > 60 ? 'bg-warning' : 'bg-primary');
@@ -193,7 +186,7 @@ export const MyDataPage = {
               </span>
             </div>
             <p class="text-secondary mb-0">
-              Transparent local storage inspector. View which browser and account email hold your links and notes, check storage quota, and export backups.
+              Inspect your local browser storage, view stored item breakdown, check storage quota, and manage data erasure.
             </p>
           </div>
           <div class="d-flex flex-wrap gap-2">
@@ -201,41 +194,32 @@ export const MyDataPage = {
               ${Icons.get('download', { size: 16 })}
               <span>Download Backup (JSON)</span>
             </button>
-            <button id="mydata-share-backup-btn" class="btn btn-primary d-flex align-items-center gap-2">
-              ${Icons.get('share-2', { size: 16, color: '#fff' })}
-              <span>Direct Share Data</span>
-            </button>
+            <a href="#data-management" class="btn btn-primary d-flex align-items-center gap-2">
+              ${Icons.get('database', { size: 16, color: '#fff' })}
+              <span>Backup & Restore Center</span>
+            </a>
           </div>
         </div>
 
         <!-- Top Profile & Environment Row -->
         <div class="row g-4 mb-4">
-          <!-- User / Account Identity Card -->
+          <!-- Local Sandbox Architecture Card -->
           <div class="col-lg-6">
             <div class="card border shadow-sm h-100">
-              <div class="card-header bg-transparent py-3 d-flex align-items-center justify-content-between">
+              <div class="card-header bg-transparent py-3">
                 <h6 class="fw-bold mb-0 d-flex align-items-center gap-2">
-                  ${Icons.get('user', { size: 18, color: 'var(--ml-primary)' })}
-                  <span>Owner Account & Linked Email ID</span>
+                  ${Icons.get('shield', { size: 18, color: 'var(--ml-primary)' })}
+                  <span>Local Browser Sandbox Architecture</span>
                 </h6>
-                <button id="btn-edit-email" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1">
-                  ${Icons.get('edit', { size: 14 })}
-                  <span>Update Email</span>
-                </button>
               </div>
               <div class="card-body">
                 <div class="p-3 bg-light rounded border mb-3">
-                  <div class="d-flex align-items-center gap-3">
-                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 48px; height: 48px; font-size: 1.25rem;">
-                      ${Security.escapeHtml((userName || 'D')[0].toUpperCase())}
-                    </div>
-                    <div class="flex-grow-1 overflow-hidden">
-                      <div class="fw-bold fs-6 text-dark text-truncate" id="display-user-name">${Security.escapeHtml(userName)}</div>
-                      <div class="text-primary small fw-semibold text-truncate d-flex align-items-center gap-1" id="display-user-email">
-                        ${Icons.get('mail', { size: 14 })}
-                        <span>${Security.escapeHtml(userEmail)}</span>
-                      </div>
-                    </div>
+                  <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="text-success">${Icons.get('check-circle-2', { size: 18 })}</span>
+                    <strong class="text-dark">Zero-Cloud, Zero-Server Operation</strong>
+                  </div>
+                  <div class="text-secondary small">
+                    ManageLinks requires no account, no email registration, and no cloud synchronization. All links, notes, folders, and categories are saved directly in your browser's private local IndexedDB vault.
                   </div>
                 </div>
 
@@ -250,16 +234,16 @@ export const MyDataPage = {
                   </div>
                   <div class="col-6">
                     <div class="p-2 border rounded bg-white">
-                      <div class="text-muted small">Cloud Sync</div>
-                      <div class="fw-semibold text-secondary d-flex align-items-center gap-1">
-                        ${Icons.get('shield', { size: 14 })} Zero Cloud Servers
+                      <div class="text-muted small">Data Privacy</div>
+                      <div class="fw-semibold text-primary d-flex align-items-center gap-1">
+                        ${Icons.get('shield', { size: 14 })} Device Only
                       </div>
                     </div>
                   </div>
                 </div>
 
                 <p class="small text-muted mt-3 mb-0">
-                  ManageLinks runs 100% inside your browser sandbox. Setting your personal email ID identifies your local vault on your device and credits your ownership when exporting bookmarks, PDFs, and encrypted JSON backups.
+                  Because data is local to your browser, logging into or out of personal email accounts in this browser does not delete your bookmarks. However, switching browser profiles or clearing site data will affect this sandbox.
                 </p>
               </div>
             </div>
@@ -433,41 +417,32 @@ export const MyDataPage = {
             <div>
               <h6 class="fw-bold text-primary mb-1">Your Privacy & Zero-Telemetry Guarantee</h6>
               <p class="small text-primary-emphasis mb-0">
-                ManageLinks is completely client-side. No remote database, no analytics, no external trackers, and no telemetry. All data shown on this page lives strictly inside this device's browser profile. When you clear your browser cache or switch computers, you can restore your data instantly using the <strong>Database & Backup Center</strong>.
+                ManageLinks is completely client-side. No remote database, no analytics, no external trackers, and no telemetry. All data shown on this page lives strictly inside this device's browser profile. When you want to transfer data to another computer or browser, use the <strong>Database & Backup Center</strong> to export and restore your files.
               </p>
             </div>
           </div>
         </div>
 
-        <!-- Update Email Modal -->
-        <div class="modal fade" id="modal-update-email" tabindex="-1" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title fw-bold d-flex align-items-center gap-2">
-                  ${Icons.get('user', { size: 20, color: 'var(--ml-primary)' })}
-                  <span>Update Account & Email Profile</span>
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                <p class="small text-muted mb-3">
-                  Set the owner name and personal email associated with this browser vault. This email is credited in exports, PDF catalogs, and backups.
+        <!-- Danger Zone: Permanent Browser Data Erasure -->
+        <div class="card border border-danger-subtle shadow-sm mb-4">
+          <div class="card-header bg-danger-subtle text-danger py-3">
+            <h6 class="fw-bold mb-0 d-flex align-items-center gap-2">
+              ${Icons.get('alert-triangle', { size: 18 })}
+              <span>Danger Zone: Permanent Browser Data Erasure</span>
+            </h6>
+          </div>
+          <div class="card-body">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+              <div>
+                <strong class="text-danger d-block mb-1">Delete All Local Data from this Browser</strong>
+                <p class="text-secondary small mb-0">
+                  Permanently purge all links, personal notes, folders, categories, tags, collections, settings, and database tables from this browser's IndexedDB engine. Once purged, this data cannot be recovered unless you have exported a JSON backup file.
                 </p>
-                <div class="mb-3">
-                  <label for="input-owner-name" class="form-label fw-semibold">Display / Owner Name</label>
-                  <input type="text" class="form-control" id="input-owner-name" value="${Security.escapeHtml(userName)}" placeholder="e.g. Devraj Chauhan" />
-                </div>
-                <div class="mb-3">
-                  <label for="input-owner-email" class="form-label fw-semibold">Personal Email ID *</label>
-                  <input type="email" class="form-control" id="input-owner-email" value="${Security.escapeHtml(userEmail)}" placeholder="e.g. yourname@gmail.com" />
-                  <div class="form-text small">Stored locally in your browser's encrypted settings store.</div>
-                </div>
               </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="btn-save-email-modal">Save Profile</button>
-              </div>
+              <button id="btn-delete-all-data" class="btn btn-danger flex-shrink-0 d-flex align-items-center gap-2">
+                ${Icons.get('trash-2', { size: 16, color: '#fff' })}
+                <span>Delete All Data</span>
+              </button>
             </div>
           </div>
         </div>
@@ -524,38 +499,7 @@ export const MyDataPage = {
       }
     });
 
-    // 2. Share Backup Button
-    document.getElementById('mydata-share-backup-btn')?.addEventListener('click', () => {
-      window.location.hash = '#data-management';
-    });
-
-    // 3. Edit Email Modal
-    const emailModalEl = document.getElementById('modal-update-email');
-    const emailModal = emailModalEl && window.bootstrap ? new window.bootstrap.Modal(emailModalEl) : null;
-
-    document.getElementById('btn-edit-email')?.addEventListener('click', () => {
-      if (emailModal) {
-        emailModal.show();
-      } else {
-        const newEmail = prompt('Enter your personal email ID:', data.userEmail);
-        if (newEmail) this.saveProfile(data.userName, newEmail);
-      }
-    });
-
-    document.getElementById('btn-save-email-modal')?.addEventListener('click', async () => {
-      const name = document.getElementById('input-owner-name')?.value.trim() || 'Devraj Chauhan';
-      const email = document.getElementById('input-owner-email')?.value.trim();
-
-      if (!email || !email.includes('@')) {
-        alert('Please enter a valid email address.');
-        return;
-      }
-
-      await this.saveProfile(name, email);
-      if (emailModal) emailModal.hide();
-    });
-
-    // 4. Request High Priority Persistence
+    // 2. Request High Priority Persistence
     document.getElementById('btn-request-persist')?.addEventListener('click', async () => {
       try {
         const granted = await db.requestPersistence();
@@ -570,7 +514,7 @@ export const MyDataPage = {
       }
     });
 
-    // 5. Run Storage Diagnostics Check
+    // 3. Run Storage Diagnostics Check
     document.getElementById('btn-run-diagnostics')?.addEventListener('click', async () => {
       const btn = document.getElementById('btn-run-diagnostics');
       btn.disabled = true;
@@ -625,22 +569,20 @@ export const MyDataPage = {
         btn.innerHTML = `${Icons.get('refresh-cw', { size: 12 })} Run Health Check`;
       }
     });
-  },
 
-  async saveProfile(name, email) {
-    try {
-      await SettingsManager.set('userName', name);
-      await SettingsManager.set('userEmail', email);
-
-      const nameEl = document.getElementById('display-user-name');
-      const emailEl = document.getElementById('display-user-email');
-      if (nameEl) nameEl.textContent = name;
-      if (emailEl) emailEl.innerHTML = `${Icons.get('mail', { size: 14 })} <span>${Security.escapeHtml(email)}</span>`;
-
-      Toast.success('Account profile & email updated successfully!');
-      this.render();
-    } catch (e) {
-      Toast.error(`Failed to save profile: ${e.message}`);
-    }
+    // 4. Danger Zone: Delete All Browser Data
+    document.getElementById('btn-delete-all-data')?.addEventListener('click', async () => {
+      const ok = await ConfirmationModal.ask({
+        title: 'PERMANENT DATA WIPE',
+        message: 'This will DELETE ALL saved bookmarks, personal notes, categories, folders, and settings from this browser. Are you absolutely certain you want to purge everything?',
+        confirmText: 'Yes, Delete Everything',
+        btnClass: 'btn-danger'
+      });
+      if (ok) {
+        await Security.wipeAllData();
+        Toast.error('All local browser data has been wiped.');
+        setTimeout(() => window.location.reload(), 1000);
+      }
+    });
   }
 };

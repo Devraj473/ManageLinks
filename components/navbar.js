@@ -24,33 +24,13 @@ export const NavbarComponent = {
       </div>
 
       <div class="header-actions">
-        <button id="nav-share-app-btn" class="btn-ml-icon text-primary d-inline-flex" title="Share & Download ManageLinks Tool">
+        <button id="nav-share-app-btn" class="btn-ml-icon text-primary d-inline-flex" title="Share ManageLinks App">
           ${Icons.get('share-2', { size: 18, color: 'var(--ml-primary)' })}
-        </button>
-
-        <button id="nav-install-btn" class="btn-ml-icon text-success d-inline-flex" title="Install ManageLinks App on Device">
-          ${Icons.get('smartphone', { size: 18, color: '#16a34a' })}
-        </button>
-
-        <button id="nav-pdf-btn" class="btn-ml-icon text-danger d-inline-flex" title="Export Links as Clickable PDF">
-          ${Icons.get('file-text', { size: 18, color: '#dc2626' })}
-        </button>
-
-        <button id="nav-random-btn" class="btn-ml-icon d-none d-sm-inline-flex" title="Open Random Link">
-          ${Icons.get('shuffle', { size: 18 })}
         </button>
 
         <button id="theme-toggle-btn" class="btn-ml-icon" title="Toggle Theme">
           ${Icons.get('sun', { size: 18, className: 'theme-icon-sun' })}
         </button>
-
-        <a href="#my-data" class="btn-ml-icon text-primary" title="My Data & Storage Profile">
-          ${Icons.get('hard-drive', { size: 18, color: 'var(--ml-primary)' })}
-        </a>
-
-        <a href="#data-management" class="btn-ml-icon" title="Backup Center">
-          ${Icons.get('database', { size: 18 })}
-        </a>
 
         <button id="btn-quick-add" class="btn-ml-primary">
           ${Icons.get('plus', { size: 18, color: '#fff' })}

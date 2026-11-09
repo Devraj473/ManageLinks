@@ -17,7 +17,7 @@ An offline-first, privacy-guaranteed Progressive Web Application (PWA) for manag
 **Official GitHub Repository:** [https://github.com/Devraj473/ManageLinks](https://github.com/Devraj473/ManageLinks)  
 **Live Web Application:** [https://Devraj473.github.io/ManageLinks/](https://Devraj473.github.io/ManageLinks/)  
 **Developer Profile:** [Devraj Chauhan](https://github.com/Devraj473)  
-**Contact Email:** [chauhandevraj473@gmail.com](mailto:chauhandevraj473@gmail.com)  
+**Contact Email:** [dc4682786@gmail.com](mailto:dc4682786@gmail.com)  
 **Version:** 1.0.0 (Production Release)
 
 </div>
@@ -183,6 +183,6 @@ ManageLinks operates under a strict **Zero-Knowledge Privacy Policy**:
 
 Developed with care by **Devraj Chauhan**.
 
-- **Email:** [chauhandevraj473@gmail.com](mailto:chauhandevraj473@gmail.com)
+- **Email:** [dc4682786@gmail.com](mailto:dc4682786@gmail.com)
 - **GitHub:** [@Devraj473](https://github.com/Devraj473)
 - **License:** [MIT License](LICENSE) &bull; Free for personal and commercial use.
